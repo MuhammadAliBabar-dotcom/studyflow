@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>StudyFlow - Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            StudyFlow
+        </div>
+
+        <div class="nav-right">
+
+            <span id="userName">
+                User
+            </span>
+
+            <button
+                id="themeButton"
+                onclick="toggleTheme()"
+            >
+                Dark Mode
+            </button>
+
+            <button
+                class="logout-button"
+                onclick="logout()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+    <main class="container">
+
+        <section class="hero">
+
+            <p class="welcome">
+                Welcome back,
+                <span id="welcomeName">
+                    User
+                </span>
+                👋
+            </p>
+
+            <h1>
+                Plan your study.<br>
+                Achieve your goals.
+            </h1>
+
+            <p class="subtitle">
+                Organize your subjects, tasks and deadlines in one place.
+            </p>
+
+        </section>
+
+
+        <section class="stats">
+
+            <div class="stat-card">
+
+                <span
+                    class="stat-number"
+                    id="totalTasks"
+                >
+                    0
+                </span>
+
+                <span class="stat-label">
+                    Total Tasks
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span
+                    class="stat-number"
+                    id="completedTasks"
+                >
+                    0
+                </span>
+
+                <span class="stat-label">
+                    Completed
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span
+                    class="stat-number"
+                    id="pendingTasks"
+                >
+                    0
+                </span>
+
+                <span class="stat-label">
+                    Pending
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span
+                    class="stat-number"
+                    id="progressPercent"
+                >
+                    0%
+                </span>
+
+                <span class="stat-label">
+                    Progress
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <h2>
+                Add New Study Task
+            </h2>
+
+            <div class="input-area">
+
+                <input
+                    type="text"
+                    id="subjectInput"
+                    placeholder="Subject"
+                >
+
+                <input
+                    type="text"
+                    id="taskInput"
+                    placeholder="Study Task"
+                >
+
+                <input
+                    type="date"
+                    id="dateInput"
+                >
+
+                <select id="priorityInput">
+
+                    <option value="Low">
+                        Low Priority
+                    </option>
+
+                    <option value="Medium">
+                        Medium Priority
+                    </option>
+
+                    <option value="High">
+                        High Priority
+                    </option>
+
+                </select>
+
+                <button
+                    class="primary-btn"
+                    onclick="addTask()"
+                >
+                    Add Task
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <h2>
+                📅 Upcoming Deadlines
+            </h2>
+
+            <div id="upcomingList">
+
+                <p class="empty-message">
+                    No upcoming deadlines.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="calendar-header">
+
+                <button onclick="previousMonth()">
+                    ‹
+                </button>
+
+                <h2 id="monthTitle"></h2>
+
+                <button onclick="nextMonth()">
+                    ›
+                </button>
+
+            </div>
+
+
+            <div class="calendar-weekdays">
+
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+
+            </div>
+
+
+            <div
+                id="calendar"
+                class="calendar"
+            ></div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="task-header">
+
+                <div>
+
+                    <h2>
+                        My Tasks
+                    </h2>
+
+                    <p id="progress">
+                        Completed: 0 / 0
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search tasks..."
+                        oninput="displayTasks()"
+                    >
+
+                    <button
+                        type="button"
+                        class="primary-btn"
+                        onclick="clearCompletedTasks()"
+                    >
+                        Clear Completed
+                    </button>
+
+                </div>
+
+            </div>
+
+            <ul id="taskList"></ul>
+
+        </section>
+
+    </main>
+
+
+    <!-- Supabase library -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <!-- Supabase connection -->
+
+    <script src="supabase.js"></script>
+
+
+    <script>
+
+        async function checkUser() {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth
+                    .getUser();
+
+
+            if (
+                error ||
+                !data.user
+            ) {
+
+                window.location.replace(
+                    "login.html"
+                );
+
+                return;
+            }
+
+
+            const user =
+                data.user;
+
+
+            const name =
+                user.user_metadata
+                    ?.full_name ||
+                user.email
+                    ?.split("@")[0] ||
+                "User";
+
+
+            document.getElementById(
+                "userName"
+            ).textContent =
+                name;
+
+
+            document.getElementById(
+                "welcomeName"
+            ).textContent =
+                name;
+        }
+
+
+        async function logout() {
+
+            await supabaseClient.auth
+                .signOut();
+
+
+            window.location.replace(
+                "login.html"
+            );
+        }
+
+
+        checkUser();
+
+    </script>
+
+
+    <!-- StudyFlow task system -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

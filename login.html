@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>StudyFlow - Login</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 18px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .forgot {
+            text-align: right;
+            margin-top: -8px;
+            margin-bottom: 18px;
+        }
+
+        .forgot a {
+            color: #555;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .forgot a:hover {
+            text-decoration: underline;
+        }
+
+        .signup {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+        }
+
+        .signup a {
+            color: #222;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="login-box">
+
+        <div class="logo">
+            📚 StudyFlow
+        </div>
+
+        <p class="subtitle">
+            Login to your StudyFlow account
+        </p>
+
+        <form id="loginForm">
+
+            <label>Email</label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                required
+            >
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+            >
+
+            <div class="forgot">
+                <a href="forgot-password.html">
+                    Forgot Password?
+                </a>
+            </div>
+
+            <button
+                type="submit"
+                id="loginButton"
+            >
+                Login
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+
+        <div class="signup">
+            Don't have an account?
+            <a href="signup.html">
+                Sign up
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Supabase connection -->
+    <script src="supabase.js"></script>
+
+
+    <script>
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        loginForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                const email =
+                    document.getElementById("email")
+                        .value.trim();
+
+                const password =
+                    document.getElementById("password")
+                        .value;
+
+                const message =
+                    document.getElementById("message");
+
+                const loginButton =
+                    document.getElementById("loginButton");
+
+                message.textContent =
+                    "Logging in...";
+
+                loginButton.disabled = true;
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth
+                        .signInWithPassword({
+
+                            email: email,
+
+                            password: password
+
+                        });
+
+                loginButton.disabled = false;
+
+                if (error) {
+
+                    console.error(error);
+
+                    message.textContent =
+                        error.message;
+
+                    return;
+                }
+
+                if (!data.session) {
+
+                    message.textContent =
+                        "Login failed. Please try again.";
+
+                    return;
+                }
+
+                message.textContent =
+                    "Login successful!";
+
+                setTimeout(
+                    function() {
+
+                        window.location.replace(
+                            "index.html"
+                        );
+
+                    },
+                    500
+                );
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
