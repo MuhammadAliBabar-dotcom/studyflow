@@ -1,295 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
+<script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    async function signup(event) {
 
-    <title>StudyFlow - Sign Up</title>
+        event.preventDefault();
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
+        const name =
+            document.getElementById("name")
+                .value.trim();
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
 
-        .signup-box {
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            padding: 35px;
-            border-radius: 18px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        }
+        const email =
+            document.getElementById("email")
+                .value.trim();
 
-        .logo {
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
 
-        .subtitle {
-            text-align: center;
-            color: #777;
-            margin-bottom: 30px;
-        }
+        const password =
+            document.getElementById("password")
+                .value;
 
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-weight: bold;
-        }
 
-        input {
-            width: 100%;
-            padding: 13px;
-            margin-bottom: 18px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-        }
+        const confirmPassword =
+            document.getElementById("confirmPassword")
+                .value;
 
-        button {
-            width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 8px;
-            background: #222;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-        }
 
-        button:hover {
-            background: #444;
-        }
+        const message =
+            document.getElementById("message");
 
-        .login {
-            text-align: center;
-            margin-top: 20px;
-            color: #777;
-        }
 
-        .login a {
-            color: #222;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        #message {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <div class="signup-box">
-
-        <div class="logo">
-            📚 StudyFlow
-        </div>
-
-        <p class="subtitle">
-            Create your StudyFlow account
-        </p>
-
-        <form onsubmit="signup(event)">
-
-            <label>Full Name</label>
-
-            <input
-                type="text"
-                id="name"
-                placeholder="Enter your name"
-                required
-            >
-
-
-            <label>Email</label>
-
-            <input
-                type="email"
-                id="email"
-                placeholder="Enter your email"
-                required
-            >
-
-
-            <label>Password</label>
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Create a password"
-                minlength="6"
-                required
-            >
-
-
-            <label>Confirm Password</label>
-
-            <input
-                type="password"
-                id="confirmPassword"
-                placeholder="Confirm your password"
-                minlength="6"
-                required
-            >
-
-
-            <button type="submit">
-                Create Account
-            </button>
-
-        </form>
-
-
-        <p id="message"></p>
-
-
-        <div class="login">
-            Already have an account?
-
-            <a href="login.html">
-                Login
-            </a>
-        </div>
-
-    </div>
-
-
-    <!-- Supabase library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Our Supabase connection -->
-    <script src="supabase.js"></script>
-
-
-    <script>
-
-        async function signup(event) {
-
-            event.preventDefault();
-
-
-            const name =
-                document.getElementById("name")
-                    .value.trim();
-
-
-            const email =
-                document.getElementById("email")
-                    .value.trim();
-
-
-            const password =
-                document.getElementById("password")
-                    .value;
-
-
-            const confirmPassword =
-                document.getElementById("confirmPassword")
-                    .value;
-
-
-            const message =
-                document.getElementById("message");
-
-
-            if (password !== confirmPassword) {
-
-                message.textContent =
-                    "Passwords do not match.";
-
-                return;
-            }
-
-
-            if (password.length < 6) {
-
-                message.textContent =
-                    "Password must be at least 6 characters.";
-
-                return;
-            }
-
+        if (password !== confirmPassword) {
 
             message.textContent =
-                "Creating account...";
+                "Passwords do not match.";
+
+            return;
+        }
 
 
-            const {
-                data,
-                error
-            } = await supabaseClient.auth.signUp({
+        if (password.length < 6) {
 
-                email: email,
+            message.textContent =
+                "Password must be at least 6 characters.";
 
-                password: password,
-
-                options: {
-
-                    data: {
-
-                        full_name: name
-
-                    }
-
-                }
-
-            });
+            return;
+        }
 
 
-            if (error) {
-
-                message.textContent =
-                    error.message;
-
-                return;
-            }
+        message.textContent =
+            "Creating account...";
 
 
-            if (
-                data.user &&
-                data.session
-            ) {
+        const {
+            data,
+            error
+        } = await supabaseClient.auth.signUp({
 
-                message.textContent =
-                    "Account created successfully!";
+            email: email,
 
-                setTimeout(function() {
+            password: password,
 
-                    window.location.href =
-                        "index.html";
+            options: {
 
-                }, 800);
+                data: {
 
-            } else {
+                    full_name: name
 
-                message.textContent =
-                    "Account created! Check your email to confirm your account.";
+                },
+
+                emailRedirectTo:
+                    "https://muhammadalibabar-dotcom.github.io/studyflow/login.html"
 
             }
+
+        });
+
+
+        if (error) {
+
+            message.textContent =
+                error.message;
+
+            return;
+        }
+
+
+        if (
+            data.user &&
+            data.session
+        ) {
+
+            message.textContent =
+                "Account created successfully!";
+
+            setTimeout(function() {
+
+                window.location.href =
+                    "index.html";
+
+            }, 800);
+
+        } else {
+
+            message.textContent =
+                "Account created! Check your email to confirm your account.";
 
         }
 
-    </script>
+    }
 
-</body>
-
-</html>
+</script>
