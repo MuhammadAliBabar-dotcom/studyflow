@@ -1,51 +1,45 @@
 /* ==================================================
    STUDYFLOW - MODERN STUDY DASHBOARD
+   Background + Glass UI + Responsive Design
 ================================================== */
 
 * {
     box-sizing: border-box;
 }
 
-
 :root {
-
     --blue: #2563eb;
     --blue-dark: #1d4ed8;
     --blue-light: #eff6ff;
 
     --green: #16a34a;
-    --green-light: #f0fdf4;
-
     --orange: #f59e0b;
-    --orange-light: #fffbeb;
-
-    --red: #ef4444;
-    --red-light: #fef2f2;
-
     --purple: #7c3aed;
-    --purple-light: #f5f3ff;
+    --red: #ef4444;
 
     --text: #172554;
     --text-dark: #0f172a;
     --muted: #64748b;
 
-    --border: rgba(148, 163, 184, 0.25);
+    --border: rgba(148, 163, 184, 0.28);
 
-    --card: rgba(255, 255, 255, 0.91);
-
-    --background: #eef4fb;
+    /* IMPORTANT:
+       Slightly transparent so background remains visible */
+    --card: rgba(255, 255, 255, 0.82);
 
     --shadow:
-        0 10px 35px rgba(15, 23, 42, 0.08);
+        0 10px 35px rgba(15, 23, 42, 0.10);
 
     --radius: 20px;
 }
-
 
 html {
     scroll-behavior: smooth;
 }
 
+/* ==================================================
+   BODY / STUDY BACKGROUND
+================================================== */
 
 body {
 
@@ -59,28 +53,58 @@ body {
 
     color: var(--text);
 
-    background:
+    /*
+       STUDY BACKGROUND
 
+       Books + desk + pencils style image.
+       Overlay is intentionally LIGHT so the image
+       remains clearly visible behind the website.
+    */
+
+    background-image:
         linear-gradient(
-            rgba(238, 244, 251, 0.84),
-            rgba(238, 244, 251, 0.90)
+            rgba(239, 246, 255, 0.46),
+            rgba(239, 246, 255, 0.54)
         ),
-
-        url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=2200&q=85");
+        url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=2200&q=90");
 
     background-size: cover;
-
-    background-position: center;
-
+    background-position: center center;
+    background-repeat: no-repeat;
     background-attachment: fixed;
 
     min-height: 100vh;
 
     transition:
-        background 0.3s,
-        color 0.3s;
+        background 0.3s ease,
+        color 0.3s ease;
 }
 
+/* Soft glass effect over the whole page */
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: -1;
+
+    background:
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(255,255,255,0.18),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 85% 75%,
+            rgba(147,197,253,0.12),
+            transparent 35%
+        );
+}
 
 /* ==================================================
    NAVBAR
@@ -101,15 +125,17 @@ body {
         max(3%, calc((100% - 1180px) / 2));
 
     background:
-        rgba(255, 255, 255, 0.91);
+        rgba(255, 255, 255, 0.84);
 
-    backdrop-filter: blur(16px);
+    backdrop-filter:
+        blur(14px);
 
-    -webkit-backdrop-filter: blur(16px);
+    -webkit-backdrop-filter:
+        blur(14px);
 
     border-bottom:
         1px solid
-        rgba(255, 255, 255, 0.6);
+        rgba(255, 255, 255, 0.75);
 
     position: sticky;
 
@@ -119,9 +145,8 @@ body {
 
     box-shadow:
         0 4px 25px
-        rgba(15, 23, 42, 0.07);
+        rgba(15, 23, 42, 0.08);
 }
-
 
 .logo {
 
@@ -140,11 +165,9 @@ body {
     color: #173a78;
 }
 
-
 .logo-icon {
     font-size: 25px;
 }
-
 
 .nav-right {
 
@@ -154,7 +177,6 @@ body {
 
     gap: 9px;
 }
-
 
 #userName {
 
@@ -170,7 +192,6 @@ body {
 
     white-space: nowrap;
 }
-
 
 #themeButton,
 .logout-button {
@@ -192,14 +213,12 @@ body {
     font-size: 13px;
 }
 
-
 #themeButton {
 
     background: #172033;
 
     color: white;
 }
-
 
 #themeButton:hover {
 
@@ -208,7 +227,6 @@ body {
     background: #263449;
 }
 
-
 .logout-button {
 
     background: #ef4444;
@@ -216,14 +234,12 @@ body {
     color: white;
 }
 
-
 .logout-button:hover {
 
     background: #dc2626;
 
     transform: translateY(-1px);
 }
-
 
 /* ==================================================
    MAIN CONTAINER
@@ -243,7 +259,6 @@ body {
     padding:
         30px 0 55px;
 }
-
 
 /* ==================================================
    HERO
@@ -268,33 +283,42 @@ body {
     border-radius:
         26px;
 
+    /*
+       More transparent than before.
+       Background remains visible around/through it.
+    */
+
     background:
 
         linear-gradient(
             110deg,
-            rgba(255, 255, 255, 0.96),
-            rgba(239, 246, 255, 0.86)
+            rgba(255, 255, 255, 0.91),
+            rgba(239, 246, 255, 0.72)
         );
 
     border:
         1px solid
-        rgba(255, 255, 255, 0.75);
+        rgba(255, 255, 255, 0.78);
 
     box-shadow:
         0 18px 50px
-        rgba(37, 99, 235, 0.10);
+        rgba(37, 99, 235, 0.12);
+
+    backdrop-filter:
+        blur(5px);
+
+    -webkit-backdrop-filter:
+        blur(5px);
 
     margin-bottom: 20px;
 }
-
 
 .hero-content {
 
     position: relative;
 
-    z-index: 2;
+    z-index: 3;
 }
-
 
 .welcome {
 
@@ -307,7 +331,6 @@ body {
 
     font-size: 16px;
 }
-
 
 .hero h1 {
 
@@ -328,7 +351,6 @@ body {
     color: #0f172a;
 }
 
-
 .subtitle {
 
     margin: 0;
@@ -342,41 +364,48 @@ body {
     max-width: 620px;
 }
 
+/* ==================================================
+   HERO STUDY DECORATION
+================================================== */
 
 .hero-decoration {
 
     position: absolute;
 
-    right: 55px;
+    right: 35px;
 
     top: 50%;
 
     transform:
         translateY(-50%);
 
-    width: 300px;
+    width: 350px;
 
-    height: 220px;
+    height: 240px;
+
+    z-index: 1;
+
+    pointer-events: none;
 }
 
-
+/* Books */
 .book-stack {
 
     position: absolute;
 
-    right: 40px;
+    right: 35px;
 
-    bottom: 20px;
+    bottom: 18px;
 
     font-size: 130px;
 
-    opacity: 0.18;
+    opacity: 0.26;
 
     transform:
         rotate(-7deg);
 }
 
-
+/* Graduation cap */
 .graduation {
 
     position: absolute;
@@ -387,12 +416,11 @@ body {
 
     font-size: 80px;
 
-    opacity: 0.35;
+    opacity: 0.42;
 
     transform:
         rotate(8deg);
 }
-
 
 /* ==================================================
    STATS
@@ -413,7 +441,6 @@ body {
     margin-bottom: 20px;
 }
 
-
 .stat-card {
 
     min-height: 112px;
@@ -427,13 +454,13 @@ body {
     padding: 20px;
 
     background:
-        var(--card);
+        rgba(255,255,255,0.84);
 
     backdrop-filter:
-        blur(14px);
+        blur(12px);
 
     -webkit-backdrop-filter:
-        blur(14px);
+        blur(12px);
 
     border:
         1px solid
@@ -450,7 +477,6 @@ body {
         box-shadow 0.2s;
 }
 
-
 .stat-card:hover {
 
     transform:
@@ -458,9 +484,8 @@ body {
 
     box-shadow:
         0 16px 35px
-        rgba(15, 23, 42, 0.11);
+        rgba(15, 23, 42, 0.13);
 }
-
 
 .stat-icon {
 
@@ -481,19 +506,16 @@ body {
     font-weight: 900;
 }
 
-
 .blue-card {
     border-top:
         3px solid
         var(--blue);
 }
 
-
 .blue-card .stat-icon {
     background: #dbeafe;
     color: var(--blue);
 }
-
 
 .green-card {
     border-top:
@@ -501,12 +523,10 @@ body {
         var(--green);
 }
 
-
 .green-card .stat-icon {
     background: #dcfce7;
     color: var(--green);
 }
-
 
 .orange-card {
     border-top:
@@ -514,12 +534,10 @@ body {
         var(--orange);
 }
 
-
 .orange-card .stat-icon {
     background: #fef3c7;
     color: var(--orange);
 }
-
 
 .purple-card {
     border-top:
@@ -527,12 +545,10 @@ body {
         var(--purple);
 }
 
-
 .purple-card .stat-icon {
     background: #ede9fe;
     color: var(--purple);
 }
-
 
 .stat-number {
 
@@ -545,7 +561,6 @@ body {
     margin-bottom: 3px;
 }
 
-
 .stat-label {
 
     display: block;
@@ -557,7 +572,6 @@ body {
     font-weight: 600;
 }
 
-
 /* ==================================================
    PANELS
 ================================================== */
@@ -565,13 +579,13 @@ body {
 .panel {
 
     background:
-        var(--card);
+        rgba(255,255,255,0.84);
 
     backdrop-filter:
-        blur(14px);
+        blur(12px);
 
     -webkit-backdrop-filter:
-        blur(14px);
+        blur(12px);
 
     border:
         1px solid
@@ -588,7 +602,6 @@ body {
         var(--shadow);
 }
 
-
 .panel h2 {
 
     margin:
@@ -600,7 +613,6 @@ body {
         #172554;
 }
 
-
 .panel-title-row p,
 .section-heading p {
 
@@ -610,7 +622,6 @@ body {
 
     font-size: 13px;
 }
-
 
 /* ==================================================
    SECTION HEADING
@@ -626,7 +637,6 @@ body {
 
     margin-bottom: 20px;
 }
-
 
 .section-icon {
 
@@ -653,7 +663,6 @@ body {
     font-weight: 800;
 }
 
-
 /* ==================================================
    ADD TASK
 ================================================== */
@@ -674,7 +683,6 @@ body {
     align-items: center;
 }
 
-
 input,
 select {
 
@@ -692,7 +700,7 @@ select {
         10px;
 
     background:
-        rgba(255, 255, 255, 0.95);
+        rgba(255,255,255,0.91);
 
     color:
         #1e293b;
@@ -706,11 +714,9 @@ select {
         box-shadow 0.2s;
 }
 
-
 input::placeholder {
     color: #94a3b8;
 }
-
 
 input:focus,
 select:focus {
@@ -727,7 +733,6 @@ select:focus {
             0.10
         );
 }
-
 
 .primary-btn {
 
@@ -755,7 +760,6 @@ select:focus {
         0.2s;
 }
 
-
 .primary-btn:hover {
 
     background:
@@ -774,7 +778,6 @@ select:focus {
         );
 }
 
-
 /* ==================================================
    TWO COLUMN AREA
 ================================================== */
@@ -789,7 +792,6 @@ select:focus {
 
     gap: 20px;
 }
-
 
 /* ==================================================
    DEADLINES
@@ -817,7 +819,7 @@ select:focus {
             248,
             250,
             252,
-            0.85
+            0.74
         );
 
     border:
@@ -835,7 +837,6 @@ select:focus {
         0.2s;
 }
 
-
 .deadline-item:hover {
 
     transform:
@@ -844,7 +845,6 @@ select:focus {
     border-left-color:
         var(--blue);
 }
-
 
 .deadline-subject {
 
@@ -858,7 +858,6 @@ select:focus {
     margin-bottom: 4px;
 }
 
-
 .deadline-date {
 
     color:
@@ -868,7 +867,6 @@ select:focus {
 
     white-space: nowrap;
 }
-
 
 .empty-message {
 
@@ -884,7 +882,6 @@ select:focus {
 
     margin: 0;
 }
-
 
 /* ==================================================
    CALENDAR
@@ -907,7 +904,6 @@ select:focus {
     margin-bottom: 15px;
 }
 
-
 .calendar-header h2 {
 
     text-align:
@@ -916,7 +912,6 @@ select:focus {
     margin: 0;
 }
 
-
 .calendar-header button {
 
     border:
@@ -924,7 +919,7 @@ select:focus {
         #dbe3ef;
 
     background:
-        #f8fafc;
+        rgba(248,250,252,0.85);
 
     color:
         #1e3a8a;
@@ -946,7 +941,6 @@ select:focus {
         0.2s;
 }
 
-
 .calendar-header button:hover {
 
     background:
@@ -957,7 +951,6 @@ select:focus {
     border-color:
         var(--blue);
 }
-
 
 .calendar-weekdays,
 .calendar {
@@ -972,7 +965,6 @@ select:focus {
 
     gap: 5px;
 }
-
 
 .calendar-weekdays div {
 
@@ -991,7 +983,6 @@ select:focus {
     padding:
         7px;
 }
-
 
 .calendar-day {
 
@@ -1013,7 +1004,7 @@ select:focus {
             251,
             253,
             255,
-            0.82
+            0.68
         );
 
     position:
@@ -1026,16 +1017,14 @@ select:focus {
         hidden;
 }
 
-
 .calendar-day:hover {
 
     border-color:
         #93c5fd;
 
     background:
-        #f8fbff;
+        rgba(248,251,255,0.90);
 }
-
 
 .calendar-day.empty {
 
@@ -1046,7 +1035,6 @@ select:focus {
         none;
 }
 
-
 .day-number {
 
     font-weight:
@@ -1056,7 +1044,6 @@ select:focus {
         12px;
 }
 
-
 .today {
 
     border:
@@ -1064,9 +1051,8 @@ select:focus {
         var(--blue);
 
     background:
-        #eff6ff;
+        rgba(239,246,255,0.88);
 }
-
 
 .calendar-task {
 
@@ -1102,7 +1088,6 @@ select:focus {
         ellipsis;
 }
 
-
 /* ==================================================
    TASK HEADER
 ================================================== */
@@ -1125,13 +1110,11 @@ select:focus {
         18px;
 }
 
-
 .task-header h2 {
 
     margin-bottom:
         4px;
 }
-
 
 #progress {
 
@@ -1145,7 +1128,6 @@ select:focus {
         13px;
 }
 
-
 .task-actions {
 
     display:
@@ -1158,13 +1140,11 @@ select:focus {
         8px;
 }
 
-
 #searchInput {
 
     width:
         250px;
 }
-
 
 .secondary-btn {
 
@@ -1180,7 +1160,7 @@ select:focus {
         10px;
 
     background:
-        white;
+        rgba(255,255,255,0.90);
 
     color:
         #334155;
@@ -1198,7 +1178,6 @@ select:focus {
         0.2s;
 }
 
-
 .secondary-btn:hover {
 
     background:
@@ -1207,7 +1186,6 @@ select:focus {
     border-color:
         #93c5fd;
 }
-
 
 /* ==================================================
    TASK LIST
@@ -1224,7 +1202,6 @@ select:focus {
     margin:
         0;
 }
-
 
 #taskList li {
 
@@ -1245,7 +1222,7 @@ select:focus {
             248,
             250,
             252,
-            0.84
+            0.72
         );
 
     border:
@@ -1269,7 +1246,6 @@ select:focus {
         0.2s;
 }
 
-
 #taskList li:hover {
 
     transform:
@@ -1281,10 +1257,9 @@ select:focus {
             15,
             23,
             42,
-            0.06
+            0.08
         );
 }
-
 
 .task-info {
 
@@ -1294,7 +1269,6 @@ select:focus {
     flex:
         1;
 }
-
 
 .subject {
 
@@ -1308,7 +1282,6 @@ select:focus {
         #1e40af;
 }
 
-
 .task-name {
 
     margin-left:
@@ -1320,7 +1293,6 @@ select:focus {
     font-size:
         14px;
 }
-
 
 .date {
 
@@ -1336,7 +1308,6 @@ select:focus {
     color:
         var(--muted);
 }
-
 
 .priority {
 
@@ -1366,7 +1337,6 @@ select:focus {
         #0369a1;
 }
 
-
 .priority-high {
 
     background:
@@ -1375,7 +1345,6 @@ select:focus {
     color:
         #b91c1c;
 }
-
 
 .priority-medium {
 
@@ -1386,7 +1355,6 @@ select:focus {
         #b45309;
 }
 
-
 .priority-low {
 
     background:
@@ -1395,7 +1363,6 @@ select:focus {
     color:
         #15803d;
 }
-
 
 .task-buttons {
 
@@ -1408,7 +1375,6 @@ select:focus {
     flex-shrink:
         0;
 }
-
 
 .task-buttons button {
 
@@ -1424,7 +1390,7 @@ select:focus {
         8px;
 
     background:
-        white;
+        rgba(255,255,255,0.92);
 
     color:
         #334155;
@@ -1442,7 +1408,6 @@ select:focus {
         0.2s;
 }
 
-
 .task-buttons button:hover {
 
     background:
@@ -1451,7 +1416,6 @@ select:focus {
     border-color:
         #93c5fd;
 }
-
 
 .task-buttons .delete-btn:hover {
 
@@ -1465,7 +1429,6 @@ select:focus {
         #dc2626;
 }
 
-
 .completed {
 
     text-decoration:
@@ -1474,7 +1437,6 @@ select:focus {
     opacity:
         0.48;
 }
-
 
 /* ==================================================
    DARK MODE
@@ -1485,35 +1447,34 @@ body.dark {
     color:
         #f8fafc;
 
-    background:
+    background-image:
 
         linear-gradient(
             rgba(
                 15,
                 23,
                 42,
-                0.90
+                0.66
             ),
             rgba(
                 15,
                 23,
                 42,
-                0.94
+                0.73
             )
         ),
 
-        url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=2200&q=85");
+        url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=2200&q=90");
 
     background-size:
         cover;
 
     background-position:
-        center;
+        center center;
 
     background-attachment:
         fixed;
 }
-
 
 body.dark .navbar {
 
@@ -1522,13 +1483,12 @@ body.dark .navbar {
             15,
             23,
             42,
-            0.94
+            0.88
         );
 
     border-color:
         #334155;
 }
-
 
 body.dark .logo,
 body.dark #userName {
@@ -1536,7 +1496,6 @@ body.dark #userName {
     color:
         white;
 }
-
 
 body.dark .hero {
 
@@ -1548,13 +1507,13 @@ body.dark .hero {
                 30,
                 41,
                 59,
-                0.96
+                0.90
             ),
             rgba(
                 23,
                 37,
                 84,
-                0.94
+                0.82
             )
         );
 
@@ -1562,14 +1521,12 @@ body.dark .hero {
         #334155;
 }
 
-
 body.dark .hero h1,
 body.dark .panel h2 {
 
     color:
         white;
 }
-
 
 body.dark .subtitle,
 body.dark .stat-label,
@@ -1583,7 +1540,6 @@ body.dark .section-heading p {
         #94a3b8;
 }
 
-
 body.dark .stat-card,
 body.dark .panel {
 
@@ -1592,19 +1548,18 @@ body.dark .panel {
             30,
             41,
             59,
-            0.91
+            0.84
         );
 
     border-color:
         #334155;
 }
 
-
 body.dark input,
 body.dark select {
 
     background:
-        #0f172a;
+        rgba(15,23,42,0.94);
 
     color:
         white;
@@ -1613,13 +1568,11 @@ body.dark select {
         #475569;
 }
 
-
 body.dark input::placeholder {
 
     color:
         #64748b;
 }
-
 
 body.dark #taskList li,
 body.dark .deadline-item {
@@ -1629,13 +1582,12 @@ body.dark .deadline-item {
             23,
             32,
             51,
-            0.90
+            0.82
         );
 
     border-color:
         #334155;
 }
-
 
 body.dark .calendar-day {
 
@@ -1644,20 +1596,18 @@ body.dark .calendar-day {
             23,
             32,
             51,
-            0.90
+            0.80
         );
 
     border-color:
         #334155;
 }
 
-
 body.dark .calendar-day.empty {
 
     background:
         transparent;
 }
-
 
 body.dark .calendar-task {
 
@@ -1668,13 +1618,11 @@ body.dark .calendar-task {
         #dbeafe;
 }
 
-
 body.dark .task-name {
 
     color:
         #cbd5e1;
 }
-
 
 body.dark .task-buttons button,
 body.dark .secondary-btn,
@@ -1690,7 +1638,6 @@ body.dark .calendar-header button {
         #475569;
 }
 
-
 body.dark .section-icon {
 
     background:
@@ -1699,7 +1646,6 @@ body.dark .section-icon {
     color:
         #bfdbfe;
 }
-
 
 /* ==================================================
    MOBILE
@@ -1712,9 +1658,7 @@ body.dark .section-icon {
         grid-template-columns:
             1fr
             1fr;
-
     }
-
 
     .input-area .primary-btn {
 
@@ -1722,13 +1666,11 @@ body.dark .section-icon {
             100%;
     }
 
-
     .dashboard-grid {
 
         grid-template-columns:
             1fr;
     }
-
 
     .stats {
 
@@ -1739,17 +1681,23 @@ body.dark .section-icon {
             );
     }
 
-
     .hero-decoration {
 
         opacity:
-            0.6;
+            0.55;
     }
-
 }
 
-
 @media (max-width: 700px) {
+
+    body {
+
+        background-attachment:
+            scroll;
+
+        background-position:
+            center center;
+    }
 
     .navbar {
 
@@ -1764,13 +1712,11 @@ body.dark .section-icon {
             14px;
     }
 
-
     .logo {
 
         font-size:
             19px;
     }
-
 
     .logo-icon {
 
@@ -1778,20 +1724,17 @@ body.dark .section-icon {
             20px;
     }
 
-
     #userName {
 
         display:
             none;
     }
 
-
     .nav-right {
 
         gap:
             5px;
     }
-
 
     #themeButton,
     .logout-button {
@@ -1804,7 +1747,6 @@ body.dark .section-icon {
             11px;
     }
 
-
     .container {
 
         width:
@@ -1815,7 +1757,6 @@ body.dark .section-icon {
             0
             35px;
     }
-
 
     .hero {
 
@@ -1828,8 +1769,15 @@ body.dark .section-icon {
 
         border-radius:
             18px;
-    }
 
+        background:
+
+            linear-gradient(
+                110deg,
+                rgba(255,255,255,0.88),
+                rgba(239,246,255,0.72)
+            );
+    }
 
     .hero h1 {
 
@@ -1840,20 +1788,41 @@ body.dark .section-icon {
             -1.5px;
     }
 
-
     .subtitle {
 
         font-size:
             14px;
     }
 
+    /*
+       IMPORTANT:
+       Don't completely hide decoration.
+       Keep a little study illustration visible.
+    */
 
     .hero-decoration {
 
         display:
-            none;
-    }
+            block;
 
+        right:
+            -80px;
+
+        bottom:
+            -20px;
+
+        top:
+            auto;
+
+        transform:
+            none;
+
+        opacity:
+            0.25;
+
+        width:
+            260px;
+    }
 
     .stats {
 
@@ -1863,7 +1832,6 @@ body.dark .section-icon {
         gap:
             9px;
     }
-
 
     .stat-card {
 
@@ -1877,7 +1845,6 @@ body.dark .section-icon {
             9px;
     }
 
-
     .stat-icon {
 
         width:
@@ -1890,20 +1857,17 @@ body.dark .section-icon {
             17px;
     }
 
-
     .stat-number {
 
         font-size:
             24px;
     }
 
-
     .stat-label {
 
         font-size:
             11px;
     }
-
 
     .panel {
 
@@ -1914,13 +1878,11 @@ body.dark .section-icon {
             16px;
     }
 
-
     .input-area {
 
         grid-template-columns:
             1fr;
     }
-
 
     .task-header {
 
@@ -1931,7 +1893,6 @@ body.dark .section-icon {
             stretch;
     }
 
-
     .task-actions {
 
         flex-direction:
@@ -1941,20 +1902,17 @@ body.dark .section-icon {
             stretch;
     }
 
-
     #searchInput {
 
         width:
             100%;
     }
 
-
     .secondary-btn {
 
         width:
             100%;
     }
-
 
     #taskList li {
 
@@ -1971,13 +1929,11 @@ body.dark .section-icon {
             14px;
     }
 
-
     .task-buttons {
 
         flex-wrap:
             wrap;
     }
-
 
     .task-buttons button {
 
@@ -1985,14 +1941,12 @@ body.dark .section-icon {
             1;
     }
 
-
     .calendar-weekdays,
     .calendar {
 
         gap:
             3px;
     }
-
 
     .calendar-day {
 
@@ -2003,7 +1957,6 @@ body.dark .section-icon {
             5px;
     }
 
-
     .calendar-task {
 
         font-size:
@@ -2012,7 +1965,6 @@ body.dark .section-icon {
         padding:
             2px;
     }
-
 
     .calendar-weekdays div {
 
@@ -2023,7 +1975,6 @@ body.dark .section-icon {
             5px
             1px;
     }
-
 
     .deadline-item {
 
@@ -2036,9 +1987,7 @@ body.dark .section-icon {
         gap:
             7px;
     }
-
 }
-
 
 @media (max-width: 400px) {
 
@@ -2048,13 +1997,11 @@ body.dark .section-icon {
             1fr;
     }
 
-
     .hero h1 {
 
         font-size:
             30px;
     }
-
 
     .nav-right button {
 
@@ -2065,5 +2012,4 @@ body.dark .section-icon {
             7px
             8px;
     }
-
 }
