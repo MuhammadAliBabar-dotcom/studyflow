@@ -15,6 +15,11 @@
         content="WI1vbFue_MS-b-XHKxU70xrJ31OCFHkvDg15HEWkZv8"
     >
 
+    <meta
+        name="description"
+        content="StudyFlow - Organize your study tasks, deadlines and progress in one place."
+    >
+
     <title>StudyFlow - Dashboard</title>
 
     <link
@@ -27,11 +32,17 @@
 
 <body>
 
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
     <nav class="navbar">
 
         <div class="logo">
-            StudyFlow
+            <span class="logo-icon">📚</span>
+            <span>StudyFlow</span>
         </div>
+
 
         <div class="nav-right">
 
@@ -41,13 +52,15 @@
 
             <button
                 id="themeButton"
+                type="button"
                 onclick="toggleTheme()"
             >
-                Dark Mode
+                🌙 Dark
             </button>
 
             <button
                 class="logout-button"
+                type="button"
                 onclick="logout()"
             >
                 Logout
@@ -58,122 +71,209 @@
     </nav>
 
 
+    <!-- =========================
+         MAIN
+    ========================== -->
+
     <main class="container">
+
+
+        <!-- HERO -->
 
         <section class="hero">
 
-            <p class="welcome">
-                Welcome back,
-                <span id="welcomeName">
-                    User
-                </span>
-                👋
-            </p>
+            <div class="hero-content">
 
-            <h1>
-                Plan your study.<br>
-                Achieve your goals.
-            </h1>
+                <p class="welcome">
+                    Welcome back,
+                    <span id="welcomeName">
+                        User
+                    </span>
+                    👋
+                </p>
 
-            <p class="subtitle">
-                Organize your subjects, tasks and deadlines in one place.
-            </p>
+                <h1>
+                    Plan your study.
+                    <br>
+                    Achieve your goals.
+                </h1>
+
+                <p class="subtitle">
+                    Organize your subjects, tasks and deadlines
+                    in one simple place.
+                </p>
+
+            </div>
+
+            <div class="hero-decoration">
+
+                <div class="book-stack">
+                    📚
+                </div>
+
+                <div class="graduation">
+                    🎓
+                </div>
+
+            </div>
 
         </section>
 
+
+        <!-- =========================
+             STATISTICS
+        ========================== -->
 
         <section class="stats">
 
-            <div class="stat-card">
+            <div class="stat-card blue-card">
 
-                <span
-                    class="stat-number"
-                    id="totalTasks"
-                >
-                    0
-                </span>
+                <div class="stat-icon">
+                    📋
+                </div>
 
-                <span class="stat-label">
-                    Total Tasks
-                </span>
+                <div>
 
-            </div>
+                    <span
+                        class="stat-number"
+                        id="totalTasks"
+                    >
+                        0
+                    </span>
 
+                    <span class="stat-label">
+                        Total Tasks
+                    </span>
 
-            <div class="stat-card">
-
-                <span
-                    class="stat-number"
-                    id="completedTasks"
-                >
-                    0
-                </span>
-
-                <span class="stat-label">
-                    Completed
-                </span>
+                </div>
 
             </div>
 
 
-            <div class="stat-card">
+            <div class="stat-card green-card">
 
-                <span
-                    class="stat-number"
-                    id="pendingTasks"
-                >
-                    0
-                </span>
+                <div class="stat-icon">
+                    ✓
+                </div>
 
-                <span class="stat-label">
-                    Pending
-                </span>
+                <div>
+
+                    <span
+                        class="stat-number"
+                        id="completedTasks"
+                    >
+                        0
+                    </span>
+
+                    <span class="stat-label">
+                        Completed
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <div class="stat-card">
+            <div class="stat-card orange-card">
 
-                <span
-                    class="stat-number"
-                    id="progressPercent"
-                >
-                    0%
-                </span>
+                <div class="stat-icon">
+                    ⏱
+                </div>
 
-                <span class="stat-label">
-                    Progress
-                </span>
+                <div>
+
+                    <span
+                        class="stat-number"
+                        id="pendingTasks"
+                    >
+                        0
+                    </span>
+
+                    <span class="stat-label">
+                        Pending
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card purple-card">
+
+                <div class="stat-icon">
+                    🎯
+                </div>
+
+                <div>
+
+                    <span
+                        class="stat-number"
+                        id="progressPercent"
+                    >
+                        0%
+                    </span>
+
+                    <span class="stat-label">
+                        Progress
+                    </span>
+
+                </div>
 
             </div>
 
         </section>
 
 
-        <section class="panel">
+        <!-- =========================
+             ADD TASK
+        ========================== -->
 
-            <h2>
-                Add New Study Task
-            </h2>
+        <section class="panel add-panel">
+
+            <div class="section-heading">
+
+                <div class="section-icon">
+                    +
+                </div>
+
+                <div>
+
+                    <h2>
+                        Add New Study Task
+                    </h2>
+
+                    <p>
+                        Add a subject, task and deadline.
+                    </p>
+
+                </div>
+
+            </div>
+
 
             <div class="input-area">
 
                 <input
                     type="text"
                     id="subjectInput"
-                    placeholder="Subject"
+                    placeholder="Subject e.g. Mathematics"
+                    maxlength="80"
                 >
+
 
                 <input
                     type="text"
                     id="taskInput"
-                    placeholder="Study Task"
+                    placeholder="Study task e.g. Complete Chapter 5"
+                    maxlength="150"
                 >
+
 
                 <input
                     type="date"
                     id="dateInput"
                 >
+
 
                 <select id="priorityInput">
 
@@ -191,11 +291,13 @@
 
                 </select>
 
+
                 <button
                     class="primary-btn"
+                    type="button"
                     onclick="addTask()"
                 >
-                    Add Task
+                    + Add Task
                 </button>
 
             </div>
@@ -203,69 +305,113 @@
         </section>
 
 
-        <section class="panel">
+        <!-- =========================
+             DEADLINES + CALENDAR
+        ========================== -->
 
-            <h2>
-                📅 Upcoming Deadlines
-            </h2>
-
-            <div id="upcomingList">
-
-                <p class="empty-message">
-                    No upcoming deadlines.
-                </p>
-
-            </div>
-
-        </section>
+        <div class="dashboard-grid">
 
 
-        <section class="panel">
+            <!-- UPCOMING -->
 
-            <div class="calendar-header">
+            <section class="panel">
 
-                <button onclick="previousMonth()">
-                    ‹
-                </button>
+                <div class="panel-title-row">
 
-                <h2 id="monthTitle"></h2>
+                    <div>
 
-                <button onclick="nextMonth()">
-                    ›
-                </button>
+                        <h2>
+                            📅 Upcoming Deadlines
+                        </h2>
 
-            </div>
+                        <p>
+                            Your next study deadlines
+                        </p>
 
+                    </div>
 
-            <div class="calendar-weekdays">
-
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-
-            </div>
+                </div>
 
 
-            <div
-                id="calendar"
-                class="calendar"
-            ></div>
+                <div id="upcomingList">
 
-        </section>
+                    <p class="empty-message">
+                        No upcoming deadlines.
+                    </p>
+
+                </div>
+
+            </section>
 
 
-        <section class="panel">
+            <!-- CALENDAR -->
+
+            <section class="panel">
+
+                <div class="calendar-header">
+
+                    <button
+                        type="button"
+                        onclick="previousMonth()"
+                        aria-label="Previous month"
+                    >
+                        ‹
+                    </button>
+
+                    <div>
+
+                        <h2 id="monthTitle">
+                            Calendar
+                        </h2>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="nextMonth()"
+                        aria-label="Next month"
+                    >
+                        ›
+                    </button>
+
+                </div>
+
+
+                <div class="calendar-weekdays">
+
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+
+                </div>
+
+
+                <div
+                    id="calendar"
+                    class="calendar"
+                ></div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =========================
+             TASKS
+        ========================== -->
+
+        <section class="panel tasks-panel">
 
             <div class="task-header">
 
                 <div>
 
                     <h2>
-                        My Tasks
+                        📝 My Tasks
                     </h2>
 
                     <p id="progress">
@@ -274,18 +420,19 @@
 
                 </div>
 
-                <div>
+
+                <div class="task-actions">
 
                     <input
                         type="text"
                         id="searchInput"
-                        placeholder="Search tasks..."
+                        placeholder="🔍 Search tasks..."
                         oninput="displayTasks()"
                     >
 
                     <button
                         type="button"
-                        class="primary-btn"
+                        class="secondary-btn"
                         onclick="clearCompletedTasks()"
                     >
                         Clear Completed
@@ -295,6 +442,7 @@
 
             </div>
 
+
             <ul id="taskList"></ul>
 
         </section>
@@ -302,15 +450,18 @@
     </main>
 
 
-    <!-- Supabase library -->
+    <!-- =========================
+         SUPABASE
+    ========================== -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
-    <!-- Supabase connection -->
-
     <script src="supabase.js"></script>
 
+
+    <!-- =========================
+         AUTH
+    ========================== -->
 
     <script>
 
@@ -319,9 +470,7 @@
             const {
                 data,
                 error
-            } =
-                await supabaseClient.auth
-                    .getUser();
+            } = await supabaseClient.auth.getUser();
 
 
             if (
@@ -342,10 +491,8 @@
 
 
             const name =
-                user.user_metadata
-                    ?.full_name ||
-                user.email
-                    ?.split("@")[0] ||
+                user.user_metadata?.full_name ||
+                user.email?.split("@")[0] ||
                 "User";
 
 
@@ -359,18 +506,33 @@
                 "welcomeName"
             ).textContent =
                 name;
+
         }
 
 
         async function logout() {
 
-            await supabaseClient.auth
-                .signOut();
+            const {
+                error
+            } =
+                await supabaseClient.auth.signOut();
+
+
+            if (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+                return;
+            }
 
 
             window.location.replace(
                 "login.html"
             );
+
         }
 
 
@@ -379,7 +541,9 @@
     </script>
 
 
-    <!-- StudyFlow task system -->
+    <!-- =========================
+         STUDYFLOW APP
+    ========================== -->
 
     <script src="script.js"></script>
 

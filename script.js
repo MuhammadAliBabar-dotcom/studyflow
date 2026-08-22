@@ -1,11 +1,15 @@
+/* ==================================================
+   STUDYFLOW - TASK SYSTEM
+================================================== */
+
 let tasks = [];
 
 let currentDate = new Date();
 
 
-// ===============================
-// LOAD USER TASKS
-// ===============================
+/* ==================================================
+   LOAD USER TASKS
+================================================== */
 
 async function loadTasks() {
 
@@ -17,9 +21,14 @@ async function loadTasks() {
     } = await supabaseClient.auth.getUser();
 
 
-    if (userError || !user) {
+    if (
+        userError ||
+        !user
+    ) {
 
-        window.location.replace("login.html");
+        window.location.replace(
+            "login.html"
+        );
 
         return;
     }
@@ -31,10 +40,16 @@ async function loadTasks() {
     } = await supabaseClient
         .from("tasks")
         .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", {
-            ascending: true
-        });
+        .eq(
+            "user_id",
+            user.id
+        )
+        .order(
+            "created_at",
+            {
+                ascending: true
+            }
+        );
 
 
     if (error) {
@@ -63,34 +78,40 @@ async function loadTasks() {
 }
 
 
-// ===============================
-// ADD TASK
-// ===============================
+/* ==================================================
+   ADD TASK
+================================================== */
 
 async function addTask() {
 
     const subject =
         document.getElementById(
             "subjectInput"
-        ).value.trim();
+        )
+        .value
+        .trim();
 
 
     const task =
         document.getElementById(
             "taskInput"
-        ).value.trim();
+        )
+        .value
+        .trim();
 
 
     const date =
         document.getElementById(
             "dateInput"
-        ).value;
+        )
+        .value;
 
 
     const priority =
         document.getElementById(
             "priorityInput"
-        ).value;
+        )
+        .value;
 
 
     if (
@@ -110,7 +131,10 @@ async function addTask() {
         data: {
             user
         }
-    } = await supabaseClient.auth.getUser();
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
 
 
     if (!user) {
@@ -130,28 +154,34 @@ async function addTask() {
     const {
         data,
         error
-    } = await supabaseClient
-        .from("tasks")
-        .insert({
+    } =
+        await supabaseClient
+            .from("tasks")
+            .insert({
 
-            user_id: user.id,
+                user_id:
+                    user.id,
 
-            subject: subject,
+                subject:
+                    subject,
 
-            task: task,
+                task:
+                    task,
 
-            date:
-                date === ""
-                    ? null
-                    : date,
+                date:
+                    date === ""
+                        ? null
+                        : date,
 
-            priority: priority,
+                priority:
+                    priority,
 
-            completed: false
+                completed:
+                    false
 
-        })
-        .select()
-        .single();
+            })
+            .select()
+            .single();
 
 
     if (error) {
@@ -182,9 +212,9 @@ async function addTask() {
 }
 
 
-// ===============================
-// DISPLAY TASKS
-// ===============================
+/* ==================================================
+   DISPLAY TASKS
+================================================== */
 
 function displayTasks() {
 
@@ -212,236 +242,344 @@ function displayTasks() {
 
 
     const filteredTasks =
-        tasks.filter(function(task) {
+        tasks.filter(
+            function(task) {
 
-            return (
-
-                task.subject
-                    .toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                task.task
-                    .toLowerCase()
-                    .includes(searchText)
-
-            );
-
-        });
+                const subject =
+                    String(
+                        task.subject || ""
+                    )
+                    .toLowerCase();
 
 
-    filteredTasks.forEach(function(task) {
+                const taskName =
+                    String(
+                        task.task || ""
+                    )
+                    .toLowerCase();
 
-        const li =
+
+                return (
+                    subject.includes(
+                        searchText
+                    ) ||
+                    taskName.includes(
+                        searchText
+                    )
+                );
+
+            }
+        );
+
+
+    if (
+        filteredTasks.length === 0
+    ) {
+
+        const empty =
             document.createElement(
                 "li"
             );
 
 
-        const taskInfo =
-            document.createElement(
-                "div"
-            );
-
-        taskInfo.className =
-            "task-info";
+        empty.className =
+            "empty-task";
 
 
-        if (task.completed) {
-
-            taskInfo.classList.add(
-                "completed"
-            );
-
-        }
-
-
-        const subjectText =
-            document.createElement(
-                "span"
-            );
-
-        subjectText.className =
-            "subject";
-
-        subjectText.textContent =
-            task.subject;
+        empty.innerHTML =
+            `
+                <div
+                    style="
+                        text-align:center;
+                        width:100%;
+                        padding:20px;
+                        color:#64748b;
+                    "
+                >
+                    📚 No tasks found.
+                </div>
+            `;
 
 
-        const taskText =
-            document.createElement(
-                "span"
-            );
-
-        taskText.className =
-            "task-name";
-
-        taskText.textContent =
-            " - " + task.task;
-
-
-        const priorityText =
-            document.createElement(
-                "span"
-            );
-
-        priorityText.className =
-            "priority";
-
-        priorityText.textContent =
-            "[" +
-            task.priority +
-            "]";
-
-
-        taskInfo.appendChild(
-            subjectText
-        );
-
-        taskInfo.appendChild(
-            taskText
-        );
-
-        taskInfo.appendChild(
-            priorityText
+        taskList.appendChild(
+            empty
         );
 
 
-        if (task.date) {
+        updateStats();
 
-            const dateText =
+        return;
+    }
+
+
+    filteredTasks.forEach(
+        function(task) {
+
+            const li =
+                document.createElement(
+                    "li"
+                );
+
+
+            const taskInfo =
+                document.createElement(
+                    "div"
+                );
+
+            taskInfo.className =
+                "task-info";
+
+
+            if (task.completed) {
+
+                taskInfo.classList.add(
+                    "completed"
+                );
+
+            }
+
+
+            const subjectText =
                 document.createElement(
                     "span"
                 );
 
-            dateText.className =
-                "date";
+            subjectText.className =
+                "subject";
 
-            dateText.textContent =
-                "Due: " +
-                task.date;
+            subjectText.textContent =
+                task.subject;
+
+
+            const taskText =
+                document.createElement(
+                    "span"
+                );
+
+            taskText.className =
+                "task-name";
+
+            taskText.textContent =
+                " — " +
+                task.task;
+
+
+            const priorityText =
+                document.createElement(
+                    "span"
+                );
+
+            priorityText.className =
+                "priority";
+
+
+            const priority =
+                String(
+                    task.priority ||
+                    "Low"
+                );
+
+
+            priorityText.textContent =
+                priority;
+
+
+            if (
+                priority === "High"
+            ) {
+
+                priorityText.classList.add(
+                    "priority-high"
+                );
+
+            } else if (
+                priority === "Medium"
+            ) {
+
+                priorityText.classList.add(
+                    "priority-medium"
+                );
+
+            } else {
+
+                priorityText.classList.add(
+                    "priority-low"
+                );
+
+            }
+
 
             taskInfo.appendChild(
-                dateText
+                subjectText
+            );
+
+            taskInfo.appendChild(
+                taskText
+            );
+
+            taskInfo.appendChild(
+                priorityText
+            );
+
+
+            if (task.date) {
+
+                const dateText =
+                    document.createElement(
+                        "span"
+                    );
+
+                dateText.className =
+                    "date";
+
+                dateText.textContent =
+                    "📅 Due: " +
+                    formatDate(
+                        task.date
+                    );
+
+                taskInfo.appendChild(
+                    dateText
+                );
+
+            }
+
+
+            const buttons =
+                document.createElement(
+                    "div"
+                );
+
+            buttons.className =
+                "task-buttons";
+
+
+            const completeButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            completeButton.textContent =
+                task.completed
+                    ? "↩ Undo"
+                    : "✓ Complete";
+
+
+            completeButton.type =
+                "button";
+
+
+            completeButton.onclick =
+                function() {
+
+                    toggleTask(
+                        task.id
+                    );
+
+                };
+
+
+            const editButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            editButton.textContent =
+                "✎ Edit";
+
+
+            editButton.type =
+                "button";
+
+
+            editButton.onclick =
+                function() {
+
+                    editTask(
+                        task.id
+                    );
+
+                };
+
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            deleteButton.textContent =
+                "Delete";
+
+
+            deleteButton.type =
+                "button";
+
+
+            deleteButton.className =
+                "delete-btn";
+
+
+            deleteButton.onclick =
+                function() {
+
+                    deleteTask(
+                        task.id
+                    );
+
+                };
+
+
+            buttons.appendChild(
+                completeButton
+            );
+
+            buttons.appendChild(
+                editButton
+            );
+
+            buttons.appendChild(
+                deleteButton
+            );
+
+
+            li.appendChild(
+                taskInfo
+            );
+
+            li.appendChild(
+                buttons
+            );
+
+
+            taskList.appendChild(
+                li
             );
 
         }
-
-
-        const buttons =
-            document.createElement(
-                "div"
-            );
-
-        buttons.className =
-            "task-buttons";
-
-
-        const completeButton =
-            document.createElement(
-                "button"
-            );
-
-        completeButton.textContent =
-            task.completed
-                ? "Undo"
-                : "Complete";
-
-
-        completeButton.onclick =
-            function() {
-
-                toggleTask(
-                    task.id
-                );
-
-            };
-
-
-        const editButton =
-            document.createElement(
-                "button"
-            );
-
-        editButton.textContent =
-            "Edit";
-
-
-        editButton.onclick =
-            function() {
-
-                editTask(
-                    task.id
-                );
-
-            };
-
-
-        const deleteButton =
-            document.createElement(
-                "button"
-            );
-
-        deleteButton.textContent =
-            "Delete";
-
-
-        deleteButton.onclick =
-            function() {
-
-                deleteTask(
-                    task.id
-                );
-
-            };
-
-
-        buttons.appendChild(
-            completeButton
-        );
-
-        buttons.appendChild(
-            editButton
-        );
-
-        buttons.appendChild(
-            deleteButton
-        );
-
-
-        li.appendChild(
-            taskInfo
-        );
-
-        li.appendChild(
-            buttons
-        );
-
-
-        taskList.appendChild(
-            li
-        );
-
-    });
+    );
 
 
     updateStats();
 }
 
 
-// ===============================
-// COMPLETE / UNDO
-// ===============================
+/* ==================================================
+   COMPLETE / UNDO
+================================================== */
 
 async function toggleTask(id) {
 
     const task =
-        tasks.find(function(task) {
+        tasks.find(
+            function(item) {
 
-            return task.id === id;
+                return item.id === id;
 
-        });
+            }
+        );
 
 
     if (!task) {
@@ -455,15 +593,19 @@ async function toggleTask(id) {
 
     const {
         error
-    } = await supabaseClient
-        .from("tasks")
-        .update({
+    } =
+        await supabaseClient
+            .from("tasks")
+            .update({
 
-            completed:
-                newCompleted
+                completed:
+                    newCompleted
 
-        })
-        .eq("id", id);
+            })
+            .eq(
+                "id",
+                id
+            );
 
 
     if (error) {
@@ -493,28 +635,33 @@ async function toggleTask(id) {
 }
 
 
-// ===============================
-// DELETE TASK
-// ===============================
+/* ==================================================
+   DELETE TASK
+================================================== */
 
 async function deleteTask(id) {
 
-    if (
-        !confirm(
+    const confirmed =
+        confirm(
             "Are you sure you want to delete this task?"
-        )
-    ) {
+        );
 
+
+    if (!confirmed) {
         return;
     }
 
 
     const {
         error
-    } = await supabaseClient
-        .from("tasks")
-        .delete()
-        .eq("id", id);
+    } =
+        await supabaseClient
+            .from("tasks")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
 
 
     if (error) {
@@ -533,11 +680,13 @@ async function deleteTask(id) {
 
 
     tasks =
-        tasks.filter(function(task) {
+        tasks.filter(
+            function(task) {
 
-            return task.id !== id;
+                return task.id !== id;
 
-        });
+            }
+        );
 
 
     displayTasks();
@@ -548,18 +697,20 @@ async function deleteTask(id) {
 }
 
 
-// ===============================
-// EDIT TASK
-// ===============================
+/* ==================================================
+   EDIT TASK
+================================================== */
 
 async function editTask(id) {
 
     const task =
-        tasks.find(function(task) {
+        tasks.find(
+            function(item) {
 
-            return task.id === id;
+                return item.id === id;
 
-        });
+            }
+        );
 
 
     if (!task) {
@@ -579,6 +730,22 @@ async function editTask(id) {
     }
 
 
+    const cleanedSubject =
+        newSubject.trim();
+
+
+    if (
+        cleanedSubject === ""
+    ) {
+
+        alert(
+            "Subject cannot be empty."
+        );
+
+        return;
+    }
+
+
     const newTask =
         prompt(
             "Enter task:",
@@ -591,9 +758,25 @@ async function editTask(id) {
     }
 
 
+    const cleanedTask =
+        newTask.trim();
+
+
+    if (
+        cleanedTask === ""
+    ) {
+
+        alert(
+            "Task cannot be empty."
+        );
+
+        return;
+    }
+
+
     const newDate =
         prompt(
-            "Enter date (YYYY-MM-DD):",
+            "Enter date (YYYY-MM-DD), or leave empty:",
             task.date || ""
         );
 
@@ -603,25 +786,67 @@ async function editTask(id) {
     }
 
 
+    const cleanedDate =
+        newDate.trim();
+
+
+    const newPriority =
+        prompt(
+            "Enter priority (Low / Medium / High):",
+            task.priority || "Low"
+        );
+
+
+    if (newPriority === null) {
+        return;
+    }
+
+
+    let cleanedPriority =
+        newPriority.trim();
+
+
+    if (
+        ![
+            "Low",
+            "Medium",
+            "High"
+        ].includes(
+            cleanedPriority
+        )
+    ) {
+
+        cleanedPriority =
+            "Low";
+    }
+
+
     const {
         error
-    } = await supabaseClient
-        .from("tasks")
-        .update({
+    } =
+        await supabaseClient
+            .from("tasks")
+            .update({
 
-            subject:
-                newSubject.trim(),
+                subject:
+                    cleanedSubject,
 
-            task:
-                newTask.trim(),
+                task:
+                    cleanedTask,
 
-            date:
-                newDate.trim() === ""
-                    ? null
-                    : newDate.trim()
+                date:
+                    cleanedDate === ""
+                        ? null
+                        : cleanedDate,
 
-        })
-        .eq("id", id);
+                priority:
+                    cleanedPriority
+
+            })
+            .eq(
+                "id",
+                id
+            );
 
 
     if (error) {
@@ -640,15 +865,18 @@ async function editTask(id) {
 
 
     task.subject =
-        newSubject.trim();
+        cleanedSubject;
 
     task.task =
-        newTask.trim();
+        cleanedTask;
 
     task.date =
-        newDate.trim() === ""
+        cleanedDate === ""
             ? null
-            : newDate.trim();
+            : cleanedDate;
+
+    task.priority =
+        cleanedPriority;
 
 
     displayTasks();
@@ -659,9 +887,103 @@ async function editTask(id) {
 }
 
 
-// ===============================
-// STATISTICS
-// ===============================
+/* ==================================================
+   CLEAR COMPLETED TASKS
+================================================== */
+
+async function clearCompletedTasks() {
+
+    const completedTasks =
+        tasks.filter(
+            function(task) {
+
+                return task.completed;
+
+            }
+        );
+
+
+    if (
+        completedTasks.length === 0
+    ) {
+
+        alert(
+            "There are no completed tasks to clear."
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Delete all completed tasks?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const ids =
+        completedTasks.map(
+            function(task) {
+
+                return task.id;
+
+            }
+        );
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("tasks")
+            .delete()
+            .in(
+                "id",
+                ids
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Error clearing completed tasks:",
+            error
+        );
+
+        alert(
+            "Could not clear completed tasks."
+        );
+
+        return;
+    }
+
+
+    tasks =
+        tasks.filter(
+            function(task) {
+
+                return !task.completed;
+
+            }
+        );
+
+
+    displayTasks();
+
+    displayCalendar();
+
+    displayUpcoming();
+}
+
+
+/* ==================================================
+   STATISTICS
+================================================== */
 
 function updateStats() {
 
@@ -670,11 +992,13 @@ function updateStats() {
 
 
     const completed =
-        tasks.filter(function(task) {
+        tasks.filter(
+            function(task) {
 
-            return task.completed;
+                return task.completed;
 
-        }).length;
+            }
+        ).length;
 
 
     const pending =
@@ -688,47 +1012,89 @@ function updateStats() {
                 (
                     completed /
                     total
-                ) * 100
+                ) *
+                100
             );
 
 
-    document.getElementById(
-        "totalTasks"
-    ).textContent =
-        total;
+    const totalElement =
+        document.getElementById(
+            "totalTasks"
+        );
 
 
-    document.getElementById(
-        "completedTasks"
-    ).textContent =
-        completed;
+    const completedElement =
+        document.getElementById(
+            "completedTasks"
+        );
 
 
-    document.getElementById(
-        "pendingTasks"
-    ).textContent =
-        pending;
+    const pendingElement =
+        document.getElementById(
+            "pendingTasks"
+        );
 
 
-    document.getElementById(
-        "progressPercent"
-    ).textContent =
-        percentage + "%";
+    const progressElement =
+        document.getElementById(
+            "progressPercent"
+        );
 
 
-    document.getElementById(
-        "progress"
-    ).textContent =
-        "Completed: " +
-        completed +
-        " / " +
-        total;
+    const progressText =
+        document.getElementById(
+            "progress"
+        );
+
+
+    if (totalElement) {
+
+        totalElement.textContent =
+            total;
+
+    }
+
+
+    if (completedElement) {
+
+        completedElement.textContent =
+            completed;
+
+    }
+
+
+    if (pendingElement) {
+
+        pendingElement.textContent =
+            pending;
+
+    }
+
+
+    if (progressElement) {
+
+        progressElement.textContent =
+            percentage +
+            "%";
+
+    }
+
+
+    if (progressText) {
+
+        progressText.textContent =
+            "Completed: " +
+            completed +
+            " / " +
+            total;
+
+    }
 }
 
 
-// ===============================
-// CLEAR INPUTS
-// ===============================
+/* ==================================================
+   CLEAR INPUTS
+================================================== */
 
 function clearInputs() {
 
@@ -754,9 +1120,9 @@ function clearInputs() {
 }
 
 
-// ===============================
-// UPCOMING DEADLINES
-// ===============================
+/* ==================================================
+   UPCOMING DEADLINES
+================================================== */
 
 function displayUpcoming() {
 
@@ -764,6 +1130,11 @@ function displayUpcoming() {
         document.getElementById(
             "upcomingList"
         );
+
+
+    if (!upcomingList) {
+        return;
+    }
 
 
     upcomingList.innerHTML = "";
@@ -783,43 +1154,52 @@ function displayUpcoming() {
 
     const upcoming =
         tasks
-            .filter(function(task) {
+            .filter(
+                function(task) {
 
-                if (
-                    !task.date ||
-                    task.completed
-                ) {
+                    if (
+                        !task.date ||
+                        task.completed
+                    ) {
 
-                    return false;
+                        return false;
 
-                }
+                    }
 
 
-                const taskDate =
-                    new Date(
-                        task.date +
-                        "T00:00:00"
+                    const taskDate =
+                        new Date(
+                            task.date +
+                            "T00:00:00"
+                        );
+
+
+                    return (
+                        taskDate >= today
                     );
 
+                }
+            )
+            .sort(
+                function(a, b) {
 
-                return (
-                    taskDate >= today
-                );
+                    return (
+                        new Date(
+                            a.date +
+                            "T00:00:00"
+                        ) -
+                        new Date(
+                            b.date +
+                            "T00:00:00"
+                        )
+                    );
 
-            })
-            .sort(function(a, b) {
-
-                return (
-                    new Date(
-                        a.date
-                    ) -
-                    new Date(
-                        b.date
-                    )
-                );
-
-            })
-            .slice(0, 5);
+                }
+            )
+            .slice(
+                0,
+                5
+            );
 
 
     if (
@@ -827,101 +1207,114 @@ function displayUpcoming() {
     ) {
 
         upcomingList.innerHTML =
-            '<p class="empty-message">' +
-            'No upcoming deadlines.' +
-            '</p>';
+            `
+                <p class="empty-message">
+                    🎉 No upcoming deadlines.
+                </p>
+            `;
 
         return;
     }
 
 
-    upcoming.forEach(function(task) {
+    upcoming.forEach(
+        function(task) {
 
-        const item =
-            document.createElement(
-                "div"
-            );
-
-        item.className =
-            "deadline-item";
+            const item =
+                document.createElement(
+                    "div"
+                );
 
 
-        const left =
-            document.createElement(
-                "div"
-            );
+            item.className =
+                "deadline-item";
 
 
-        const subject =
-            document.createElement(
-                "div"
-            );
-
-        subject.className =
-            "deadline-subject";
-
-        subject.textContent =
-            task.subject +
-            " - " +
-            task.task;
+            const left =
+                document.createElement(
+                    "div"
+                );
 
 
-        const priority =
-            document.createElement(
-                "div"
-            );
-
-        priority.className =
-            "deadline-date";
-
-        priority.textContent =
-            "Priority: " +
-            task.priority;
+            const subject =
+                document.createElement(
+                    "div"
+                );
 
 
-        left.appendChild(
-            subject
-        );
-
-        left.appendChild(
-            priority
-        );
+            subject.className =
+                "deadline-subject";
 
 
-        const date =
-            document.createElement(
-                "div"
-            );
+            subject.textContent =
+                task.subject +
+                " — " +
+                task.task;
 
-        date.className =
-            "deadline-date";
 
-        date.textContent =
-            formatDate(
-                task.date
+            const priority =
+                document.createElement(
+                    "div"
+                );
+
+
+            priority.className =
+                "deadline-date";
+
+
+            priority.textContent =
+                "Priority: " +
+                task.priority;
+
+
+            left.appendChild(
+                subject
             );
 
 
-        item.appendChild(
-            left
-        );
-
-        item.appendChild(
-            date
-        );
+            left.appendChild(
+                priority
+            );
 
 
-        upcomingList.appendChild(
-            item
-        );
+            const date =
+                document.createElement(
+                    "div"
+                );
 
-    });
+
+            date.className =
+                "deadline-date";
+
+
+            date.textContent =
+                formatDate(
+                    task.date
+                );
+
+
+            item.appendChild(
+                left
+            );
+
+
+            item.appendChild(
+                date
+            );
+
+
+            upcomingList.appendChild(
+                item
+            );
+
+        }
+    );
 }
 
 
-// ===============================
-// CALENDAR
-// ===============================
+/* ==================================================
+   CALENDAR
+================================================== */
 
 function displayCalendar() {
 
@@ -935,6 +1328,14 @@ function displayCalendar() {
         document.getElementById(
             "monthTitle"
         );
+
+
+    if (
+        !calendar ||
+        !monthTitle
+    ) {
+        return;
+    }
 
 
     calendar.innerHTML = "";
@@ -990,8 +1391,10 @@ function displayCalendar() {
                 "div"
             );
 
+
         empty.className =
             "calendar-day empty";
+
 
         calendar.appendChild(
             empty
@@ -1011,6 +1414,7 @@ function displayCalendar() {
                 "div"
             );
 
+
         cell.className =
             "calendar-day";
 
@@ -1020,8 +1424,10 @@ function displayCalendar() {
                 "div"
             );
 
+
         dayNumber.className =
             "day-number";
+
 
         dayNumber.textContent =
             day;
@@ -1057,10 +1463,8 @@ function displayCalendar() {
         if (
             day ===
                 today.getDate() &&
-
             month ===
                 today.getMonth() &&
-
             year ===
                 today.getFullYear()
         ) {
@@ -1108,9 +1512,11 @@ function displayCalendar() {
                     task.completed
                 ) {
 
-                    taskElement.style
-                        .textDecoration =
+                    taskElement.style.textDecoration =
                         "line-through";
+
+                    taskElement.style.opacity =
+                        "0.5";
 
                 }
 
@@ -1131,9 +1537,9 @@ function displayCalendar() {
 }
 
 
-// ===============================
-// MONTH NAVIGATION
-// ===============================
+/* ==================================================
+   MONTH NAVIGATION
+================================================== */
 
 function previousMonth() {
 
@@ -1157,9 +1563,9 @@ function nextMonth() {
 }
 
 
-// ===============================
-// FORMAT DATE
-// ===============================
+/* ==================================================
+   FORMAT DATE
+================================================== */
 
 function formatDate(dateString) {
 
@@ -1175,6 +1581,16 @@ function formatDate(dateString) {
         );
 
 
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return dateString;
+    }
+
+
     return date.toLocaleDateString(
         "en-US",
         {
@@ -1186,9 +1602,35 @@ function formatDate(dateString) {
 }
 
 
-// ===============================
-// DARK MODE
-// ===============================
+/* ==================================================
+   DARK MODE
+================================================== */
+
+function updateThemeButton() {
+
+    const button =
+        document.getElementById(
+            "themeButton"
+        );
+
+
+    if (!button) {
+        return;
+    }
+
+
+    const isDark =
+        document.body.classList.contains(
+            "dark"
+        );
+
+
+    button.textContent =
+        isDark
+            ? "☀ Light"
+            : "🌙 Dark";
+}
+
 
 function toggleTheme() {
 
@@ -1203,20 +1645,21 @@ function toggleTheme() {
         );
 
 
-    document.getElementById(
-        "themeButton"
-    ).textContent =
-        isDark
-            ? "Light Mode"
-            : "Dark Mode";
-
-
     localStorage.setItem(
         "darkMode",
         isDark
+            ? "true"
+            : "false"
     );
+
+
+    updateThemeButton();
 }
 
+
+/* ==================================================
+   INITIAL THEME
+================================================== */
 
 if (
     localStorage.getItem(
@@ -1227,17 +1670,70 @@ if (
     document.body.classList.add(
         "dark"
     );
-
-
-    document.getElementById(
-        "themeButton"
-    ).textContent =
-        "Light Mode";
 }
 
 
-// ===============================
-// START APP
-// ===============================
+updateThemeButton();
+
+
+/* ==================================================
+   ENTER KEY - ADD TASK
+================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const subjectInput =
+            document.getElementById(
+                "subjectInput"
+            );
+
+
+        const taskInput =
+            document.getElementById(
+                "taskInput"
+            );
+
+
+        function handleEnter(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                addTask();
+
+            }
+
+        }
+
+
+        if (subjectInput) {
+
+            subjectInput.addEventListener(
+                "keydown",
+                handleEnter
+            );
+
+        }
+
+
+        if (taskInput) {
+
+            taskInput.addEventListener(
+                "keydown",
+                handleEnter
+            );
+
+        }
+
+    }
+);
+
+
+/* ==================================================
+   START APP
+================================================== */
 
 loadTasks();
