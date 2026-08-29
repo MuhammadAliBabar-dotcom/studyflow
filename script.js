@@ -1,5 +1,5 @@
 /* ==================================================
-   STUDYFLOW - TASK SYSTEM
+   STUDYFLOW - TASK SYSTEM + AI READY
 ================================================== */
 
 let tasks = [];
@@ -75,6 +75,10 @@ async function loadTasks() {
     displayCalendar();
 
     displayUpcoming();
+
+    updateStats();
+
+    updateAIContext();
 }
 
 
@@ -87,31 +91,25 @@ async function addTask() {
     const subject =
         document.getElementById(
             "subjectInput"
-        )
-        .value
-        .trim();
+        ).value.trim();
 
 
     const task =
         document.getElementById(
             "taskInput"
-        )
-        .value
-        .trim();
+        ).value.trim();
 
 
     const date =
         document.getElementById(
             "dateInput"
-        )
-        .value;
+        ).value;
 
 
     const priority =
         document.getElementById(
             "priorityInput"
-        )
-        .value;
+        ).value;
 
 
     if (
@@ -209,6 +207,8 @@ async function addTask() {
     displayCalendar();
 
     displayUpcoming();
+
+    updateAIContext();
 }
 
 
@@ -222,6 +222,11 @@ function displayTasks() {
         document.getElementById(
             "taskList"
         );
+
+
+    if (!taskList) {
+        return;
+    }
 
 
     const searchInput =
@@ -632,6 +637,8 @@ async function toggleTask(id) {
     displayCalendar();
 
     displayUpcoming();
+
+    updateAIContext();
 }
 
 
@@ -694,6 +701,8 @@ async function deleteTask(id) {
     displayCalendar();
 
     displayUpcoming();
+
+    updateAIContext();
 }
 
 
@@ -884,6 +893,8 @@ async function editTask(id) {
     displayCalendar();
 
     displayUpcoming();
+
+    updateAIContext();
 }
 
 
@@ -978,6 +989,8 @@ async function clearCompletedTasks() {
     displayCalendar();
 
     displayUpcoming();
+
+    updateAIContext();
 }
 
 
@@ -1089,6 +1102,9 @@ function updateStats() {
             total;
 
     }
+
+
+    updateAIContext();
 }
 
 
@@ -1728,8 +1744,595 @@ document.addEventListener(
 
         }
 
+
+        initializeAI();
     }
 );
+
+
+/* ==================================================
+   AI STUDY ASSISTANT
+   FRONTEND CONNECTION
+================================================== */
+
+/*
+   IMPORTANT:
+
+   AI API key yahan nahi rakhni.
+
+   Browser -> Supabase Edge Function -> AI Provider
+
+   Is tarah API key GitHub/public website mein
+   expose nahi hogi.
+*/
+
+
+const AI_FUNCTION_NAME =
+    "study-ai";
+
+
+/* ==================================================
+   AI CONTEXT
+================================================== */
+
+function updateAIContext() {
+
+    const aiContext =
+        document.getElementById(
+            "aiTaskContext"
+        );
+
+
+    if (!aiContext) {
+        return;
+    }
+
+
+    const total =
+        tasks.length;
+
+
+    const completed =
+        tasks.filter(
+            function(task) {
+
+                return task.completed;
+
+            }
+        ).length;
+
+
+    const pending =
+        total - completed;
+
+
+    const upcoming =
+        tasks
+            .filter(
+                function(task) {
+
+                    return (
+                        task.date &&
+                        !task.completed
+                    );
+
+                }
+            )
+            .sort(
+                function(a, b) {
+
+                    return (
+                        new Date(a.date) -
+                        new Date(b.date)
+                    );
+
+                }
+            )
+            .slice(0, 5);
+
+
+    aiContext.textContent =
+        `
+        Total tasks: ${total}
+        Completed: ${completed}
+        Pending: ${pending}
+
+        Upcoming:
+        ${
+            upcoming.length
+                ? upcoming
+                    .map(
+                        function(task) {
+
+                            return (
+                                `${task.subject} - ` +
+                                `${task.task} - ` +
+                                `${task.date || "No date"}`
+                            );
+
+                        }
+                    )
+                    .join("\n")
+                : "No upcoming tasks."
+        }
+        `.trim();
+}
+
+
+/* ==================================================
+   AI REQUEST
+================================================== */
+
+async function askStudyAI(
+    prompt,
+    mode = "assistant"
+) {
+
+    const input =
+        String(
+            prompt || ""
+        ).trim();
+
+
+    if (!input) {
+
+        showAIStatus(
+            "Please enter something first."
+        );
+
+        return;
+    }
+
+
+    showAIStatus(
+        "🤖 Study AI is thinking..."
+    );
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.functions.invoke(
+                AI_FUNCTION_NAME,
+                {
+                    body: {
+
+                        prompt:
+                            input,
+
+                        mode:
+                            mode,
+
+                        tasks:
+                            tasks.map(
+                                function(task) {
+
+                                    return {
+
+                                        subject:
+                                            task.subject,
+
+                                        task:
+                                            task.task,
+
+                                        date:
+                                            task.date,
+
+                                        priority:
+                                            task.priority,
+
+                                        completed:
+                                            task.completed
+
+                                    };
+
+                                }
+                            )
+
+                    }
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "AI Function Error:",
+                error
+            );
+
+            showAIStatus(
+                "⚠ AI is not connected yet. We will connect the AI backend in the next step."
+            );
+
+            return null;
+        }
+
+
+        const answer =
+            data?.answer ||
+            data?.message ||
+            data?.text ||
+            "AI did not return an answer.";
+
+
+        displayAIAnswer(
+            answer
+        );
+
+
+        showAIStatus(
+            "✅ Answer ready"
+        );
+
+
+        return answer;
+
+    } catch (error) {
+
+        console.error(
+            "AI error:",
+            error
+        );
+
+
+        showAIStatus(
+            "⚠ Something went wrong while connecting to Study AI."
+        );
+
+
+        return null;
+    }
+}
+
+
+/* ==================================================
+   AI UI HELPERS
+================================================== */
+
+function displayAIAnswer(answer) {
+
+    const output =
+        document.getElementById(
+            "aiResponse"
+        );
+
+
+    if (!output) {
+        return;
+    }
+
+
+    output.textContent =
+        answer;
+
+
+    output.style.display =
+        "block";
+}
+
+
+function showAIStatus(message) {
+
+    const status =
+        document.getElementById(
+            "aiStatus"
+        );
+
+
+    if (!status) {
+        return;
+    }
+
+
+    status.textContent =
+        message;
+}
+
+
+/* ==================================================
+   AI QUICK ACTIONS
+================================================== */
+
+async function explainTopic() {
+
+    const input =
+        document.getElementById(
+            "aiTopicInput"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const topic =
+        input.value.trim();
+
+
+    if (!topic) {
+
+        showAIStatus(
+            "Please enter a topic."
+        );
+
+        return;
+    }
+
+
+    await askStudyAI(
+        `
+Explain this study topic clearly for a student:
+
+${topic}
+
+Use:
+1. Simple explanation
+2. Important points
+3. One easy example
+4. Short exam tip
+        `,
+        "explain"
+    );
+}
+
+
+async function summarizeNotes() {
+
+    const input =
+        document.getElementById(
+            "aiNotesInput"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const notes =
+        input.value.trim();
+
+
+    if (!notes) {
+
+        showAIStatus(
+            "Please paste your notes first."
+        );
+
+        return;
+    }
+
+
+    await askStudyAI(
+        `
+Summarize these study notes.
+
+Give:
+1. Key concepts
+2. Important facts
+3. Short revision notes
+4. Important terms
+
+Notes:
+
+${notes}
+        `,
+        "summary"
+    );
+}
+
+
+async function generateQuiz() {
+
+    const input =
+        document.getElementById(
+            "aiQuizTopic"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const topic =
+        input.value.trim();
+
+
+    if (!topic) {
+
+        showAIStatus(
+            "Please enter a quiz topic."
+        );
+
+        return;
+    }
+
+
+    await askStudyAI(
+        `
+Create a student-friendly quiz about:
+
+${topic}
+
+Create 5 questions.
+
+Mix:
+- Multiple choice
+- Short answer
+
+Give the answer after each question.
+        `,
+        "quiz"
+    );
+}
+
+
+async function createStudyPlan() {
+
+    const completed =
+        tasks.filter(
+            function(task) {
+
+                return task.completed;
+
+            }
+        ).length;
+
+
+    const pending =
+        tasks.filter(
+            function(task) {
+
+                return !task.completed;
+
+            }
+        );
+
+
+    const taskText =
+        pending.length
+            ? pending
+                .map(
+                    function(task) {
+
+                        return (
+                            `${task.subject}: ` +
+                            `${task.task} | ` +
+                            `Deadline: ` +
+                            `${task.date || "None"} | ` +
+                            `Priority: ` +
+                            `${task.priority || "Low"}`
+                        );
+
+                    }
+                )
+                .join("\n")
+            : "No pending tasks.";
+
+
+    await askStudyAI(
+        `
+Create a realistic study plan using my current StudyFlow tasks.
+
+Completed tasks: ${completed}
+
+Pending tasks:
+
+${taskText}
+
+Make the plan:
+- Practical
+- Prioritized
+- Easy to follow
+- Deadline-aware
+- Broken into study sessions
+
+Also tell me which task I should focus on first.
+        `,
+        "plan"
+    );
+}
+
+
+async function focusHelp() {
+
+    await askStudyAI(
+        `
+Help me focus on my studies using my current tasks.
+
+Look at my pending tasks and tell me:
+
+1. What should I study first?
+2. What should I ignore for now?
+3. How should I divide my next study session?
+4. Give me a short motivation message.
+
+Keep it practical and concise.
+        `,
+        "focus"
+    );
+}
+
+
+/* ==================================================
+   AI CHAT
+================================================== */
+
+async function sendAIMessage() {
+
+    const input =
+        document.getElementById(
+            "aiChatInput"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const message =
+        input.value.trim();
+
+
+    if (!message) {
+        return;
+    }
+
+
+    input.value = "";
+
+
+    await askStudyAI(
+        message,
+        "chat"
+    );
+}
+
+
+/* ==================================================
+   AI ENTER KEY
+================================================== */
+
+function initializeAI() {
+
+    const chatInput =
+        document.getElementById(
+            "aiChatInput"
+        );
+
+
+    if (chatInput) {
+
+        chatInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendAIMessage();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    updateAIContext();
+}
 
 
 /* ==================================================
@@ -1737,3 +2340,215 @@ document.addEventListener(
 ================================================== */
 
 loadTasks();
+/* ==================================================
+   STUDYFLOW AI - FRONTEND
+================================================== */
+
+function selectAITool(tool) {
+
+    const input =
+        document.getElementById("aiInput");
+
+    if (!input) {
+        return;
+    }
+
+    const prompts = {
+
+        "Explain a topic":
+            "Explain this topic in simple words: ",
+
+        "Make notes":
+            "Make clear and easy-to-revise study notes about: ",
+
+        "Generate quiz":
+            "Create a quiz to test my knowledge about: ",
+
+        "Create study plan":
+            "Create a study plan for: "
+
+    };
+
+    input.value =
+        prompts[tool] || "";
+
+    input.focus();
+}
+
+
+function addAIMessage(
+    message,
+    isUser = false
+) {
+
+    const messages =
+        document.getElementById(
+            "aiMessages"
+        );
+
+    if (!messages) {
+        return;
+    }
+
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        isUser
+            ? "ai-message ai-message-user"
+            : "ai-message";
+
+
+    const content =
+        document.createElement("div");
+
+    content.className =
+        "ai-message-content";
+
+
+    const strong =
+        document.createElement("strong");
+
+    strong.textContent =
+        isUser
+            ? "You"
+            : "StudyFlow AI";
+
+
+    const paragraph =
+        document.createElement("p");
+
+    paragraph.textContent =
+        message;
+
+
+    content.appendChild(strong);
+
+    content.appendChild(paragraph);
+
+    wrapper.appendChild(content);
+
+    messages.appendChild(wrapper);
+
+
+    messages.scrollTop =
+        messages.scrollHeight;
+}
+
+
+async function sendAIMessage() {
+
+    const input =
+        document.getElementById(
+            "aiInput"
+        );
+
+    const button =
+        document.getElementById(
+            "aiSendButton"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const message =
+        input.value.trim();
+
+
+    if (!message) {
+        return;
+    }
+
+
+    addAIMessage(
+        message,
+        true
+    );
+
+
+    input.value = "";
+
+
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "Thinking...";
+
+    }
+
+
+    /*
+       AI API connection will be added
+       through a secure backend next.
+
+       DO NOT put an OpenAI/Gemini API key
+       directly inside this file.
+    */
+
+    setTimeout(
+        function() {
+
+            addAIMessage(
+                "AI connection is ready for the next setup step. Your API key will be connected securely through the backend."
+            );
+
+            if (button) {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Send ➤";
+
+            }
+
+        },
+        700
+    );
+}
+
+
+/* ==================================================
+   AI ENTER KEY
+================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const input =
+            document.getElementById(
+                "aiInput"
+            );
+
+
+        if (!input) {
+            return;
+        }
+
+
+        input.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendAIMessage();
+
+                }
+
+            }
+        );
+
+    }
+);

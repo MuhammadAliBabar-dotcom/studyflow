@@ -17,7 +17,7 @@
 
     <meta
         name="description"
-        content="StudyFlow - Organize your study tasks, deadlines and progress in one place."
+        content="StudyFlow - Organize your study tasks, deadlines, progress and get AI-powered study help."
     >
 
     <title>StudyFlow - Dashboard</title>
@@ -39,8 +39,15 @@
     <nav class="navbar">
 
         <div class="logo">
-            <span class="logo-icon">📚</span>
-            <span>StudyFlow</span>
+
+            <span class="logo-icon">
+                📚
+            </span>
+
+            <span>
+                StudyFlow
+            </span>
+
         </div>
 
 
@@ -50,6 +57,7 @@
                 User
             </span>
 
+
             <button
                 id="themeButton"
                 type="button"
@@ -57,6 +65,7 @@
             >
                 🌙 Dark
             </button>
+
 
             <button
                 class="logout-button"
@@ -71,6 +80,7 @@
     </nav>
 
 
+
     <!-- =========================
          MAIN
     ========================== -->
@@ -78,38 +88,54 @@
     <main class="container">
 
 
-        <!-- HERO -->
+        <!-- =========================
+             HERO
+        ========================== -->
 
         <section class="hero">
 
             <div class="hero-content">
 
                 <p class="welcome">
+
                     Welcome back,
+
                     <span id="welcomeName">
                         User
                     </span>
+
                     👋
+
                 </p>
 
+
                 <h1>
+
                     Plan your study.
+
                     <br>
+
                     Achieve your goals.
+
                 </h1>
 
+
                 <p class="subtitle">
+
                     Organize your subjects, tasks and deadlines
                     in one simple place.
+
                 </p>
 
             </div>
+
 
             <div class="hero-decoration">
 
                 <div class="book-stack">
                     📚
                 </div>
+
 
                 <div class="graduation">
                     🎓
@@ -120,17 +146,254 @@
         </section>
 
 
+
+        <!-- =========================
+             AI STUDY CENTER
+        ========================== -->
+
+        <section
+            class="panel ai-panel"
+            id="studyAI"
+        >
+
+            <div class="ai-header">
+
+                <div class="ai-title-area">
+
+                    <div class="ai-icon">
+                        🤖
+                    </div>
+
+
+                    <div>
+
+                        <h2>
+                            StudyFlow AI
+                        </h2>
+
+
+                        <p>
+                            Your personal AI study assistant
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <span class="ai-badge">
+                    ✨ AI Study Tools
+                </span>
+
+            </div>
+
+
+
+            <div class="ai-search-box">
+
+                <textarea
+                    id="aiInput"
+                    rows="4"
+                    maxlength="3000"
+                    placeholder="Ask StudyFlow AI anything about your studies...&#10;&#10;Example: Explain photosynthesis in simple words."
+                ></textarea>
+
+
+                <div class="ai-bottom">
+
+                    <span
+                        id="aiCharCount"
+                        class="ai-char-count"
+                    >
+                        0 / 3000
+                    </span>
+
+
+                    <button
+                        type="button"
+                        class="ai-ask-button"
+                        onclick="askStudyAI()"
+                    >
+                        ✨ Ask StudyFlow AI
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 AI QUICK TOOLS
+            ========================== -->
+
+            <div class="ai-tools">
+
+
+                <button
+                    type="button"
+                    class="ai-tool"
+                    onclick="setAITemplate('explain')"
+                >
+
+                    <span>
+                        📚
+                    </span>
+
+
+                    <div>
+
+                        <strong>
+                            Explain Topic
+                        </strong>
+
+
+                        <small>
+                            Understand difficult topics
+                        </small>
+
+                    </div>
+
+                </button>
+
+
+
+                <button
+                    type="button"
+                    class="ai-tool"
+                    onclick="setAITemplate('summary')"
+                >
+
+                    <span>
+                        📝
+                    </span>
+
+
+                    <div>
+
+                        <strong>
+                            Summarize Notes
+                        </strong>
+
+
+                        <small>
+                            Turn notes into simple points
+                        </small>
+
+                    </div>
+
+                </button>
+
+
+
+                <button
+                    type="button"
+                    class="ai-tool"
+                    onclick="setAITemplate('quiz')"
+                >
+
+                    <span>
+                        🧠
+                    </span>
+
+
+                    <div>
+
+                        <strong>
+                            Generate Quiz
+                        </strong>
+
+
+                        <small>
+                            Practice with questions
+                        </small>
+
+                    </div>
+
+                </button>
+
+
+
+                <button
+                    type="button"
+                    class="ai-tool"
+                    onclick="setAITemplate('plan')"
+                >
+
+                    <span>
+                        📅
+                    </span>
+
+
+                    <div>
+
+                        <strong>
+                            Study Plan
+                        </strong>
+
+
+                        <small>
+                            Create a focused study schedule
+                        </small>
+
+                    </div>
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =========================
+                 AI RESPONSE
+            ========================== -->
+
+            <div
+                id="aiResponse"
+                class="ai-response"
+            >
+
+                <div class="ai-empty">
+
+                    <div class="ai-empty-icon">
+                        ✨
+                    </div>
+
+
+                    <h3>
+                        How can I help you study?
+                    </h3>
+
+
+                    <p>
+
+                        Ask a question or choose one of the
+                        AI study tools above.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
         <!-- =========================
              STATISTICS
         ========================== -->
 
         <section class="stats">
 
+
             <div class="stat-card blue-card">
 
                 <div class="stat-icon">
                     📋
                 </div>
+
 
                 <div>
 
@@ -141,6 +404,7 @@
                         0
                     </span>
 
+
                     <span class="stat-label">
                         Total Tasks
                     </span>
@@ -150,11 +414,13 @@
             </div>
 
 
+
             <div class="stat-card green-card">
 
                 <div class="stat-icon">
                     ✓
                 </div>
+
 
                 <div>
 
@@ -165,6 +431,7 @@
                         0
                     </span>
 
+
                     <span class="stat-label">
                         Completed
                     </span>
@@ -174,11 +441,13 @@
             </div>
 
 
+
             <div class="stat-card orange-card">
 
                 <div class="stat-icon">
                     ⏱
                 </div>
+
 
                 <div>
 
@@ -189,6 +458,7 @@
                         0
                     </span>
 
+
                     <span class="stat-label">
                         Pending
                     </span>
@@ -198,11 +468,13 @@
             </div>
 
 
+
             <div class="stat-card purple-card">
 
                 <div class="stat-icon">
                     🎯
                 </div>
+
 
                 <div>
 
@@ -213,6 +485,7 @@
                         0%
                     </span>
 
+
                     <span class="stat-label">
                         Progress
                     </span>
@@ -221,7 +494,9 @@
 
             </div>
 
+
         </section>
+
 
 
         <!-- =========================
@@ -230,17 +505,20 @@
 
         <section class="panel add-panel">
 
+
             <div class="section-heading">
 
                 <div class="section-icon">
                     +
                 </div>
 
+
                 <div>
 
                     <h2>
                         Add New Study Task
                     </h2>
+
 
                     <p>
                         Add a subject, task and deadline.
@@ -251,7 +529,9 @@
             </div>
 
 
+
             <div class="input-area">
+
 
                 <input
                     type="text"
@@ -281,9 +561,11 @@
                         Low Priority
                     </option>
 
+
                     <option value="Medium">
                         Medium Priority
                     </option>
+
 
                     <option value="High">
                         High Priority
@@ -305,6 +587,7 @@
         </section>
 
 
+
         <!-- =========================
              DEADLINES + CALENDAR
         ========================== -->
@@ -323,6 +606,7 @@
                         <h2>
                             📅 Upcoming Deadlines
                         </h2>
+
 
                         <p>
                             Your next study deadlines
@@ -344,11 +628,13 @@
             </section>
 
 
+
             <!-- CALENDAR -->
 
             <section class="panel">
 
                 <div class="calendar-header">
+
 
                     <button
                         type="button"
@@ -358,6 +644,7 @@
                         ‹
                     </button>
 
+
                     <div>
 
                         <h2 id="monthTitle">
@@ -365,6 +652,7 @@
                         </h2>
 
                     </div>
+
 
                     <button
                         type="button"
@@ -375,6 +663,7 @@
                     </button>
 
                 </div>
+
 
 
                 <div class="calendar-weekdays">
@@ -390,6 +679,7 @@
                 </div>
 
 
+
                 <div
                     id="calendar"
                     class="calendar"
@@ -400,19 +690,23 @@
         </div>
 
 
+
         <!-- =========================
              TASKS
         ========================== -->
 
         <section class="panel tasks-panel">
 
+
             <div class="task-header">
+
 
                 <div>
 
                     <h2>
                         📝 My Tasks
                     </h2>
+
 
                     <p id="progress">
                         Completed: 0 / 0
@@ -421,7 +715,9 @@
                 </div>
 
 
+
                 <div class="task-actions">
+
 
                     <input
                         type="text"
@@ -429,6 +725,7 @@
                         placeholder="🔍 Search tasks..."
                         oninput="displayTasks()"
                     >
+
 
                     <button
                         type="button"
@@ -443,11 +740,13 @@
             </div>
 
 
+
             <ul id="taskList"></ul>
 
         </section>
 
     </main>
+
 
 
     <!-- =========================
@@ -457,6 +756,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script src="supabase.js"></script>
+
 
 
     <!-- =========================
@@ -483,6 +783,7 @@
                 );
 
                 return;
+
             }
 
 
@@ -510,6 +811,7 @@
         }
 
 
+
         async function logout() {
 
             const {
@@ -526,6 +828,7 @@
                 );
 
                 return;
+
             }
 
 
@@ -541,12 +844,340 @@
     </script>
 
 
+
+    <!-- =========================
+         STUDYFLOW AI
+    ========================== -->
+
+    <script>
+
+
+        const aiInput =
+            document.getElementById(
+                "aiInput"
+            );
+
+
+        const aiCharCount =
+            document.getElementById(
+                "aiCharCount"
+            );
+
+
+
+        /* =========================
+           CHARACTER COUNTER
+        ========================== */
+
+        if (aiInput) {
+
+            aiInput.addEventListener(
+                "input",
+                function () {
+
+                    aiCharCount.textContent =
+                        aiInput.value.length +
+                        " / 3000";
+
+                }
+            );
+
+        }
+
+
+
+        /* =========================
+           AI QUICK TEMPLATES
+        ========================== */
+
+        function setAITemplate(type) {
+
+            if (!aiInput) {
+                return;
+            }
+
+
+            const templates = {
+
+
+                explain:
+                    "Explain this topic in simple words. Give me an easy example and then test me with 3 quick questions:\n\nTopic: ",
+
+
+                summary:
+                    "Summarize these study notes into clear, short bullet points. Highlight the most important things I should remember:\n\nNotes:\n",
+
+
+                quiz:
+                    "Create a practice quiz from this topic. Give me 10 questions with a mix of MCQs and short-answer questions. Put the answers at the end:\n\nTopic: ",
+
+
+                plan:
+                    "Create a realistic study plan for me. Break the topic into focused sessions, include short breaks, revision and practice:\n\nSubject/Topic: "
+
+            };
+
+
+            aiInput.value =
+                templates[type] || "";
+
+
+            aiInput.focus();
+
+
+            aiInput.dispatchEvent(
+                new Event("input")
+            );
+
+        }
+
+
+
+        /* =========================
+           ASK STUDYFLOW AI
+        ========================== */
+
+        async function askStudyAI() {
+
+
+            const question =
+                aiInput
+                    ? aiInput.value.trim()
+                    : "";
+
+
+            if (!question) {
+
+                alert(
+                    "Please enter something for StudyFlow AI."
+                );
+
+                return;
+
+            }
+
+
+
+            const responseBox =
+                document.getElementById(
+                    "aiResponse"
+                );
+
+
+            /* Loading */
+
+            responseBox.innerHTML = `
+
+                <div class="ai-loading">
+
+                    <div class="ai-loading-icon">
+                        ✨
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            StudyFlow AI is thinking...
+                        </strong>
+
+
+                        <p>
+                            Preparing your study answer.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+
+            try {
+
+
+                /* =========================
+                   CALL SUPABASE EDGE FUNCTION
+                ========================== */
+
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.functions.invoke(
+                        "study-ai",
+                        {
+                            body: {
+                                question: question
+                            }
+                        }
+                    );
+
+
+
+                if (error) {
+
+                    console.error(
+                        "StudyFlow AI error:",
+                        error
+                    );
+
+
+                    throw new Error(
+                        error.message ||
+                        "AI request failed."
+                    );
+
+                }
+
+
+
+                if (
+                    !data ||
+                    !data.answer
+                ) {
+
+                    throw new Error(
+                        "AI returned an empty response."
+                    );
+
+                }
+
+
+
+                /* =========================
+                   DISPLAY AI ANSWER
+                ========================== */
+
+                responseBox.innerHTML = `
+
+                    <div class="ai-demo-response">
+
+                        <div class="ai-response-title">
+                            🤖 StudyFlow AI
+                        </div>
+
+
+                        <div class="ai-answer">
+
+                            ${escapeHTML(
+                                data.answer
+                            ).replace(
+                                /\n/g,
+                                "<br>"
+                            )}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "StudyFlow AI error:",
+                    error
+                );
+
+
+                responseBox.innerHTML = `
+
+                    <div class="ai-demo-response">
+
+                        <div class="ai-response-title">
+                            ⚠️ StudyFlow AI
+                        </div>
+
+
+                        <p>
+                            Sorry, I couldn't get an AI response right now.
+                        </p>
+
+
+                        <div class="ai-next-step">
+
+                            ${escapeHTML(
+                                error.message ||
+                                "Please try again."
+                            )}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+
+        /* =========================
+           SECURITY
+        ========================== */
+
+        function escapeHTML(text) {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.textContent =
+                text;
+
+
+            return div.innerHTML;
+
+        }
+
+
+
+        /* =========================
+           CTRL + ENTER
+        ========================== */
+
+        if (aiInput) {
+
+            aiInput.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        (
+                            event.ctrlKey ||
+                            event.metaKey
+                        ) &&
+                        event.key === "Enter"
+                    ) {
+
+                        askStudyAI();
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+
+
+
     <!-- =========================
          STUDYFLOW APP
     ========================== -->
 
     <script src="script.js"></script>
 
-</body>
 
+</body>
+s
 </html>
