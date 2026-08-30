@@ -211,6 +211,7 @@
 
                     <button
                         type="button"
+                        id="aiAskButton"
                         class="ai-ask-button"
                         onclick="askStudyAI()"
                     >
@@ -595,8 +596,6 @@
         <div class="dashboard-grid">
 
 
-            <!-- UPCOMING -->
-
             <section class="panel">
 
                 <div class="panel-title-row">
@@ -628,8 +627,6 @@
             </section>
 
 
-
-            <!-- CALENDAR -->
 
             <section class="panel">
 
@@ -847,327 +844,10 @@
 
     <!-- =========================
          STUDYFLOW AI
+         AI CODE IS IN ai.js
     ========================== -->
 
-    <script>
-
-
-        const aiInput =
-            document.getElementById(
-                "aiInput"
-            );
-
-
-        const aiCharCount =
-            document.getElementById(
-                "aiCharCount"
-            );
-
-
-
-        /* =========================
-           CHARACTER COUNTER
-        ========================== */
-
-        if (aiInput) {
-
-            aiInput.addEventListener(
-                "input",
-                function () {
-
-                    aiCharCount.textContent =
-                        aiInput.value.length +
-                        " / 3000";
-
-                }
-            );
-
-        }
-
-
-
-        /* =========================
-           AI QUICK TEMPLATES
-        ========================== */
-
-        function setAITemplate(type) {
-
-            if (!aiInput) {
-                return;
-            }
-
-
-            const templates = {
-
-
-                explain:
-                    "Explain this topic in simple words. Give me an easy example and then test me with 3 quick questions:\n\nTopic: ",
-
-
-                summary:
-                    "Summarize these study notes into clear, short bullet points. Highlight the most important things I should remember:\n\nNotes:\n",
-
-
-                quiz:
-                    "Create a practice quiz from this topic. Give me 10 questions with a mix of MCQs and short-answer questions. Put the answers at the end:\n\nTopic: ",
-
-
-                plan:
-                    "Create a realistic study plan for me. Break the topic into focused sessions, include short breaks, revision and practice:\n\nSubject/Topic: "
-
-            };
-
-
-            aiInput.value =
-                templates[type] || "";
-
-
-            aiInput.focus();
-
-
-            aiInput.dispatchEvent(
-                new Event("input")
-            );
-
-        }
-
-
-
-        /* =========================
-           ASK STUDYFLOW AI
-        ========================== */
-
-        async function askStudyAI() {
-
-
-            const question =
-                aiInput
-                    ? aiInput.value.trim()
-                    : "";
-
-
-            if (!question) {
-
-                alert(
-                    "Please enter something for StudyFlow AI."
-                );
-
-                return;
-
-            }
-
-
-
-            const responseBox =
-                document.getElementById(
-                    "aiResponse"
-                );
-
-
-            /* Loading */
-
-            responseBox.innerHTML = `
-
-                <div class="ai-loading">
-
-                    <div class="ai-loading-icon">
-                        ✨
-                    </div>
-
-
-                    <div>
-
-                        <strong>
-                            StudyFlow AI is thinking...
-                        </strong>
-
-
-                        <p>
-                            Preparing your study answer.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-
-            try {
-
-
-                /* =========================
-                   CALL SUPABASE EDGE FUNCTION
-                ========================== */
-
-
-                const {
-                    data,
-                    error
-                } =
-                    await supabaseClient.functions.invoke(
-                        "study-ai",
-                        {
-                            body: {
-                                question: question
-                            }
-                        }
-                    );
-
-
-
-                if (error) {
-
-                    console.error(
-                        "StudyFlow AI error:",
-                        error
-                    );
-
-
-                    throw new Error(
-                        error.message ||
-                        "AI request failed."
-                    );
-
-                }
-
-
-
-                if (
-                    !data ||
-                    !data.answer
-                ) {
-
-                    throw new Error(
-                        "AI returned an empty response."
-                    );
-
-                }
-
-
-
-                /* =========================
-                   DISPLAY AI ANSWER
-                ========================== */
-
-                responseBox.innerHTML = `
-
-                    <div class="ai-demo-response">
-
-                        <div class="ai-response-title">
-                            🤖 StudyFlow AI
-                        </div>
-
-
-                        <div class="ai-answer">
-
-                            ${escapeHTML(
-                                data.answer
-                            ).replace(
-                                /\n/g,
-                                "<br>"
-                            )}
-
-                        </div>
-
-                    </div>
-
-                `;
-
-
-            } catch (error) {
-
-
-                console.error(
-                    "StudyFlow AI error:",
-                    error
-                );
-
-
-                responseBox.innerHTML = `
-
-                    <div class="ai-demo-response">
-
-                        <div class="ai-response-title">
-                            ⚠️ StudyFlow AI
-                        </div>
-
-
-                        <p>
-                            Sorry, I couldn't get an AI response right now.
-                        </p>
-
-
-                        <div class="ai-next-step">
-
-                            ${escapeHTML(
-                                error.message ||
-                                "Please try again."
-                            )}
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            }
-
-        }
-
-
-
-        /* =========================
-           SECURITY
-        ========================== */
-
-        function escapeHTML(text) {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.textContent =
-                text;
-
-
-            return div.innerHTML;
-
-        }
-
-
-
-        /* =========================
-           CTRL + ENTER
-        ========================== */
-
-        if (aiInput) {
-
-            aiInput.addEventListener(
-                "keydown",
-                function (event) {
-
-                    if (
-                        (
-                            event.ctrlKey ||
-                            event.metaKey
-                        ) &&
-                        event.key === "Enter"
-                    ) {
-
-                        askStudyAI();
-
-                    }
-
-                }
-            );
-
-        }
-
-    </script>
+    <script src="ai.js"></script>
 
 
 
@@ -1179,5 +859,5 @@
 
 
 </body>
-s
+
 </html>

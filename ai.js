@@ -1,16 +1,10 @@
 /* ==================================================
    STUDYFLOW AI
-   Frontend AI assistant interface
+   Supabase Edge Function Connection
 ================================================== */
 
-const aiInput =
-    document.getElementById("aiInput");
-
-const aiResponse =
-    document.getElementById("aiResponse");
-
-const aiAskButton =
-    document.getElementById("aiAskButton");
+const aiInput = document.getElementById("aiInput");
+const aiResponse = document.getElementById("aiResponse");
 
 
 /* ==================================================
@@ -23,9 +17,7 @@ function setAIPrompt(prompt) {
         return;
     }
 
-    aiInput.value =
-        prompt;
-
+    aiInput.value = prompt;
     aiInput.focus();
 
 }
@@ -37,178 +29,26 @@ function setAIPrompt(prompt) {
 
 function escapeAIText(text) {
 
-    const div =
-        document.createElement("div");
+    const div = document.createElement("div");
 
-    div.textContent =
-        text;
+    div.textContent = text;
 
     return div.innerHTML;
+
 }
 
 
 /* ==================================================
-   ADD USER MESSAGE
-================================================== */
-
-function addUserMessage(message) {
-
-    if (!aiResponse) {
-        return;
-    }
-
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.className =
-        "ai-user-message";
-
-    wrapper.innerHTML = `
-        <div class="ai-user-bubble">
-            ${escapeAIText(message)}
-        </div>
-    `;
-
-    aiResponse.appendChild(
-        wrapper
-    );
-
-    scrollAIToBottom();
-}
-
-
-/* ==================================================
-   ADD AI MESSAGE
-================================================== */
-
-function addAIMessage(message) {
-
-    if (!aiResponse) {
-        return;
-    }
-
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.className =
-        "ai-assistant-message";
-
-    wrapper.innerHTML = `
-        <div class="ai-assistant-icon">
-            ✨
-        </div>
-
-        <div class="ai-assistant-bubble">
-            ${escapeAIText(message)}
-        </div>
-    `;
-
-    aiResponse.appendChild(
-        wrapper
-    );
-
-    scrollAIToBottom();
-}
-
-
-/* ==================================================
-   LOADING
-================================================== */
-
-function showAILoading() {
-
-    if (!aiResponse) {
-        return;
-    }
-
-    const loading =
-        document.createElement("div");
-
-    loading.id =
-        "aiLoading";
-
-    loading.className =
-        "ai-assistant-message";
-
-    loading.innerHTML = `
-        <div class="ai-assistant-icon">
-            ✨
-        </div>
-
-        <div class="ai-assistant-bubble">
-
-            <div class="ai-loading">
-
-                Thinking
-
-                <span class="ai-dots">
-
-                    <span></span>
-                    <span></span>
-                    <span></span>
-
-                </span>
-
-            </div>
-
-        </div>
-    `;
-
-    aiResponse.appendChild(
-        loading
-    );
-
-    scrollAIToBottom();
-}
-
-
-/* ==================================================
-   REMOVE LOADING
-================================================== */
-
-function removeAILoading() {
-
-    const loading =
-        document.getElementById(
-            "aiLoading"
-        );
-
-    if (loading) {
-
-        loading.remove();
-
-    }
-}
-
-
-/* ==================================================
-   SCROLL
-================================================== */
-
-function scrollAIToBottom() {
-
-    if (!aiResponse) {
-        return;
-    }
-
-    aiResponse.scrollTop =
-        aiResponse.scrollHeight;
-}
-
-
-/* ==================================================
-   ASK AI
+   ASK STUDYFLOW AI
 ================================================== */
 
 async function askStudyAI() {
 
-    if (!aiInput) {
+    if (!aiInput || !aiResponse) {
         return;
     }
 
-    const question =
-        aiInput.value.trim();
-
+    const question = aiInput.value.trim();
 
     if (!question) {
 
@@ -219,91 +59,101 @@ async function askStudyAI() {
     }
 
 
-    addUserMessage(
-        question
-    );
+    /* Loading */
 
+    aiResponse.innerHTML = `
+        <div class="ai-loading">
 
-    aiInput.value = "";
+            <div class="ai-loading-icon">
+                ✨
+            </div>
 
+            <div>
 
-    if (aiAskButton) {
+                <strong>
+                    StudyFlow AI is thinking...
+                </strong>
 
-        aiAskButton.disabled =
-            true;
+                <p>
+                    Preparing your study answer.
+                </p>
 
-        aiAskButton.innerHTML =
-            "⏳ Thinking...";
+            </div>
 
-    }
-
-
-    showAILoading();
+        </div>
+    `;
 
 
     try {
 
-        /*
-         * IMPORTANT:
-         *
-         * Real AI API connection will be added
-         * through a secure backend endpoint.
-         *
-         * Example endpoint:
-         *
-         * /api/ai
-         *
-         * Do NOT put your Gemini/OpenAI secret key
-         * directly inside this file.
-         */
+        /* ==========================================
+           CALL SUPABASE EDGE FUNCTION
+        ========================================== */
 
-
-        const response =
-            await fetch(
-                "/api/ai",
+        const { data, error } =
+            await supabaseClient.functions.invoke(
+                "study-ai",
                 {
-                    method:
-                        "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:
-                        JSON.stringify({
-                            message:
-                                question
-                        })
+                    body: {
+                        question: question
+                    }
                 }
             );
 
 
-        if (!response.ok) {
+        if (error) {
+
+            console.error(
+                "StudyFlow AI Error:",
+                error
+            );
 
             throw new Error(
-                "AI service is not connected yet."
+                error.message ||
+                "AI request failed."
             );
 
         }
 
 
-        const data =
-            await response.json();
+        if (!data || !data.answer) {
+
+            throw new Error(
+                "AI returned an empty response."
+            );
+
+        }
 
 
-        removeAILoading();
+        /* ==========================================
+           SHOW AI RESPONSE
+        ========================================== */
+
+        aiResponse.innerHTML = `
+            <div class="ai-demo-response">
+
+                <div class="ai-response-title">
+                    🤖 StudyFlow AI
+                </div>
+
+                <div class="ai-answer">
+                    ${escapeAIText(data.answer).replace(/\n/g, "<br>")}
+                </div>
+
+            </div>
+        `;
 
 
-        const answer =
-            data.reply ||
-            data.message ||
-            "I couldn't generate a response right now.";
+        /* Clear input */
 
+        aiInput.value = "";
 
-        addAIMessage(
-            answer
-        );
+        const counter =
+            document.getElementById("aiCharCount");
+
+        if (counter) {
+            counter.textContent = "0 / 3000";
+        }
 
 
     } catch (error) {
@@ -314,24 +164,26 @@ async function askStudyAI() {
         );
 
 
-        removeAILoading();
+        aiResponse.innerHTML = `
+            <div class="ai-demo-response">
 
+                <div class="ai-response-title">
+                    ⚠️ StudyFlow AI
+                </div>
 
-        addAIMessage(
-            "AI connection abhi setup nahi hui. Interface ready hai — next step mein secure Gemini/OpenAI API connection connect karna hoga."
-        );
+                <p>
+                    AI response nahi aa saki.
+                </p>
 
-    } finally {
+                <div class="ai-next-step">
+                    ${escapeAIText(
+                        error.message ||
+                        "Please try again."
+                    )}
+                </div>
 
-        if (aiAskButton) {
-
-            aiAskButton.disabled =
-                false;
-
-            aiAskButton.innerHTML =
-                "<span>✨ Ask AI</span>";
-
-        }
+            </div>
+        `;
 
     }
 
@@ -350,7 +202,7 @@ if (aiInput) {
 
             if (
                 event.key === "Enter" &&
-                !event.shiftKey
+                (event.ctrlKey || event.metaKey)
             ) {
 
                 event.preventDefault();
