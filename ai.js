@@ -1,465 +1,495 @@
 /* ==================================================
-   STUDYFLOW AI
-   Frontend AI assistant
-   Supabase Edge Function: study-ai
+   STUDYFLOW AI - FINAL FRONTEND
 ================================================== */
 
 "use strict";
 
-document.addEventListener("DOMContentLoaded", function () {
 
-    const aiInput = document.getElementById("aiInput");
-    const aiResponse = document.getElementById("aiResponse");
-    const aiCharCount = document.getElementById("aiCharCount");
-    const aiAskButton = document.getElementById("aiAskButton");
+/* ==================================================
+   GET ELEMENTS
+================================================== */
 
-    console.log("StudyFlow AI loaded");
-    console.log("Input:", aiInput);
-    console.log("Response:", aiResponse);
-    console.log("Button:", aiAskButton);
+const aiInput = document.getElementById("aiInput");
+const aiResponse = document.getElementById("aiResponse");
+const aiCharCount = document.getElementById("aiCharCount");
+const aiAskButton = document.getElementById("aiAskButton");
 
 
-    /* ==================================================
-       CHARACTER COUNTER
-    ================================================== */
-
-    if (aiInput && aiCharCount) {
-
-        aiInput.addEventListener("input", function () {
-
-            aiCharCount.textContent =
-                aiInput.value.length + " / 3000";
-
-        });
-
-    }
+console.log("StudyFlow AI loaded successfully.");
+console.log("AI input:", aiInput);
+console.log("AI response:", aiResponse);
+console.log("AI button:", aiAskButton);
 
 
-    /* ==================================================
-       ESCAPE HTML
-    ================================================== */
+/* ==================================================
+   CHARACTER COUNTER
+================================================== */
 
-    function escapeHTML(text) {
+if (aiInput && aiCharCount) {
 
-        const div = document.createElement("div");
+    aiInput.addEventListener("input", function () {
 
-        div.textContent = String(text ?? "");
+        aiCharCount.textContent =
+            aiInput.value.length + " / 3000";
 
-        return div.innerHTML;
+    });
 
-    }
+}
 
 
-    /* ==================================================
-       QUICK TEMPLATES
-    ================================================== */
+/* ==================================================
+   ESCAPE HTML
+================================================== */
 
-    window.setAITemplate = function (type) {
+function escapeHTML(text) {
 
-        if (!aiInput) return;
+    const div = document.createElement("div");
 
-        const templates = {
+    div.textContent = String(text ?? "");
 
-            explain:
-                "Explain this topic in simple words. Give me an easy example and then test me with 3 quick questions:\n\nTopic: ",
+    return div.innerHTML;
 
-            summary:
-                "Summarize these study notes into clear, short bullet points. Highlight the most important things I should remember:\n\nNotes:\n",
+}
 
-            quiz:
-                "Create a practice quiz from this topic. Give me 10 questions with a mix of MCQs and short-answer questions. Put the answers at the end:\n\nTopic: ",
 
-            plan:
-                "Create a realistic study plan for me. Break the topic into focused sessions, include short breaks, revision and practice:\n\nSubject/Topic: "
+/* ==================================================
+   QUICK TEMPLATES
+================================================== */
 
-        };
+window.setAITemplate = function (type) {
 
-        aiInput.value = templates[type] || "";
+    if (!aiInput) return;
 
-        if (aiCharCount) {
+    const templates = {
 
-            aiCharCount.textContent =
-                aiInput.value.length + " / 3000";
+        explain:
+            "Explain this topic in simple words. Give me an easy example and then test me with 3 quick questions:\n\nTopic: ",
 
-        }
+        summary:
+            "Summarize these study notes into clear, short bullet points. Highlight the most important things I should remember:\n\nNotes:\n",
 
-        aiInput.focus();
+        quiz:
+            "Create a practice quiz from this topic. Give me 10 questions with a mix of MCQs and short-answer questions. Put the answers at the end:\n\nTopic: ",
+
+        plan:
+            "Create a realistic study plan for me. Break the topic into focused sessions, include short breaks, revision and practice:\n\nSubject/Topic: "
 
     };
 
+    aiInput.value = templates[type] || "";
 
-    /* ==================================================
-       LOADING
-    ================================================== */
-
-    function showLoading() {
-
-        if (!aiResponse) return;
-
-        aiResponse.innerHTML = `
-            <div class="ai-loading">
-
-                <div class="ai-loading-icon">
-                    ✨
-                </div>
-
-                <div>
-                    <strong>
-                        StudyFlow AI is thinking...
-                    </strong>
-
-                    <p>
-                        Preparing your study answer.
-                    </p>
-                </div>
-
-            </div>
-        `;
-
+    if (aiCharCount) {
+        aiCharCount.textContent =
+            aiInput.value.length + " / 3000";
     }
 
+    aiInput.focus();
 
-    /* ==================================================
-       SHOW ANSWER
-    ================================================== */
+};
 
-    function showAnswer(answer) {
 
-        if (!aiResponse) return;
+/* ==================================================
+   LOADING
+================================================== */
 
-        const safeAnswer =
-            escapeHTML(answer)
-            .replace(/\r?\n/g, "<br>");
+function showLoading() {
 
-        aiResponse.innerHTML = `
-            <div class="ai-demo-response">
+    if (!aiResponse) return;
 
-                <div class="ai-response-title">
-                    🤖 StudyFlow AI
-                </div>
+    aiResponse.innerHTML = `
+        <div class="ai-loading">
 
-                <div class="ai-answer">
-                    ${safeAnswer}
-                </div>
-
+            <div class="ai-loading-icon">
+                ✨
             </div>
-        `;
 
-        aiResponse.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest"
-        });
-
-    }
-
-
-    /* ==================================================
-       SHOW ERROR
-    ================================================== */
-
-    function showError(message) {
-
-        if (!aiResponse) return;
-
-        aiResponse.innerHTML = `
-            <div class="ai-demo-response">
-
-                <div class="ai-response-title">
-                    ⚠️ StudyFlow AI
-                </div>
+            <div>
+                <strong>
+                    StudyFlow AI is thinking...
+                </strong>
 
                 <p>
-                    Sorry, I couldn't get an AI response right now.
+                    Preparing your study answer.
                 </p>
-
-                <div class="ai-next-step">
-                    ${escapeHTML(message)}
-                </div>
-
             </div>
-        `;
+
+        </div>
+    `;
+
+}
+
+
+/* ==================================================
+   SHOW ANSWER
+================================================== */
+
+function showAnswer(answer) {
+
+    if (!aiResponse) return;
+
+    const safeAnswer =
+        escapeHTML(answer)
+        .replace(/\r?\n/g, "<br>");
+
+    aiResponse.innerHTML = `
+        <div class="ai-demo-response">
+
+            <div class="ai-response-title">
+                🤖 StudyFlow AI
+            </div>
+
+            <div class="ai-answer">
+                ${safeAnswer}
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/* ==================================================
+   SHOW ERROR
+================================================== */
+
+function showError(message) {
+
+    if (!aiResponse) return;
+
+    aiResponse.innerHTML = `
+        <div class="ai-demo-response">
+
+            <div class="ai-response-title">
+                ⚠️ StudyFlow AI
+            </div>
+
+            <p>
+                Sorry, I couldn't get an AI response right now.
+            </p>
+
+            <div class="ai-next-step">
+                ${escapeHTML(message)}
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/* ==================================================
+   MAIN AI FUNCTION
+================================================== */
+
+window.askStudyAI = async function () {
+
+    console.log("================================");
+    console.log("ASK STUDY AI CLICKED");
+    console.log("================================");
+
+
+    const input =
+        document.getElementById("aiInput");
+
+    const responseBox =
+        document.getElementById("aiResponse");
+
+    const button =
+        document.getElementById("aiAskButton");
+
+
+    if (!input || !responseBox) {
+
+        console.error(
+            "AI input or response box not found."
+        );
+
+        return;
 
     }
 
 
-    /* ==================================================
-       ASK AI
-    ================================================== */
-
-    window.askStudyAI = async function () {
-
-        console.log("askStudyAI() called");
+    const question =
+        input.value.trim();
 
 
-        if (!aiInput || !aiResponse) {
+    console.log(
+        "Question:",
+        question
+    );
 
-            console.error(
-                "StudyFlow AI: input or response box missing."
+
+    if (!question) {
+
+        alert(
+            "Please enter a question first."
+        );
+
+        input.focus();
+
+        return;
+
+    }
+
+
+    /* Disable button */
+
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "⏳ Thinking...";
+
+    }
+
+
+    showLoading();
+
+
+    try {
+
+        /* ==================================================
+           CHECK SUPABASE
+        ================================================== */
+
+        if (
+            typeof supabaseClient === "undefined" ||
+            !supabaseClient
+        ) {
+
+            throw new Error(
+                "Supabase client is not available."
             );
 
-            return;
-
         }
-
-
-        const question =
-            aiInput.value.trim();
 
 
         console.log(
-            "Question:",
-            question
+            "Sending request to study-ai..."
         );
 
 
-        if (!question) {
+        /* ==================================================
+           CALL EDGE FUNCTION
+        ================================================== */
 
-            alert(
-                "Please enter a question first."
-            );
-
-            aiInput.focus();
-
-            return;
-
-        }
-
-
-        if (question.length > 3000) {
-
-            alert(
-                "Please keep your question under 3000 characters."
-            );
-
-            return;
-
-        }
-
-
-        /* Disable button */
-
-        if (aiAskButton) {
-
-            aiAskButton.disabled = true;
-
-            aiAskButton.textContent =
-                "⏳ Thinking...";
-
-        }
-
-
-        showLoading();
-
-
-        try {
-
-            /* ==================================================
-               CHECK SUPABASE CLIENT
-            ================================================== */
-
-            if (
-                typeof window.supabaseClient === "undefined" ||
-                !window.supabaseClient
-            ) {
-
-                throw new Error(
-                    "Supabase client is not available. Check supabase.js."
-                );
-
-            }
-
-
-            console.log(
-                "Calling Supabase Edge Function..."
-            );
-
-
-            /* ==================================================
-               CALL EDGE FUNCTION
-            ================================================== */
-
-            const result =
-                await window.supabaseClient.functions.invoke(
-                    "study-ai",
-                    {
-                        body: {
-                            question: question
-                        }
+        const result =
+            await supabaseClient.functions.invoke(
+                "study-ai",
+                {
+                    body: {
+                        question: question
                     }
-                );
-
-
-            console.log(
-                "FULL SUPABASE RESULT:",
-                result
+                }
             );
 
 
-            const data =
-                result?.data;
+        console.log(
+            "SUPABASE RESULT:",
+            result
+        );
 
-            const error =
-                result?.error;
+
+        const data =
+            result?.data;
+
+        const error =
+            result?.error;
 
 
-            console.log(
-                "AI DATA:",
-                data
+        console.log(
+            "DATA:",
+            data
+        );
+
+        console.log(
+            "ERROR:",
+            error
+        );
+
+
+        /* ==================================================
+           CHECK ERROR
+        ================================================== */
+
+        if (error) {
+
+            throw new Error(
+                error.message ||
+                "Study AI request failed."
             );
-
-            console.log(
-                "AI ERROR:",
-                error
-            );
-
-
-            /* ==================================================
-               ERROR CHECK
-            ================================================== */
-
-            if (error) {
-
-                throw new Error(
-                    error.message ||
-                    "Supabase Edge Function failed."
-                );
-
-            }
-
-
-            if (!data) {
-
-                throw new Error(
-                    "No data received from the AI function."
-                );
-
-            }
-
-
-            if (data.error) {
-
-                throw new Error(
-                    data.error
-                );
-
-            }
-
-
-            /* ==================================================
-               GET ANSWER
-            ================================================== */
-
-            let answer =
-                data.answer;
-
-
-            /*
-             * Extra compatibility:
-             * In case the function ever returns
-             * a different response structure.
-             */
-
-            if (
-                !answer &&
-                data.candidates?.[0]?.content?.parts
-            ) {
-
-                answer =
-                    data.candidates[0]
-                        .content
-                        .parts
-                        .map(function (part) {
-                            return part.text || "";
-                        })
-                        .join("");
-
-            }
-
-
-            if (
-                typeof answer !== "string" ||
-                !answer.trim()
-            ) {
-
-                throw new Error(
-                    "AI returned an empty answer."
-                );
-
-            }
-
-
-            console.log(
-                "FINAL AI ANSWER:",
-                answer
-            );
-
-
-            /* ==================================================
-               DISPLAY ANSWER
-            ================================================== */
-
-            showAnswer(answer);
-
-
-        } catch (error) {
-
-            console.error(
-                "StudyFlow AI ERROR:",
-                error
-            );
-
-
-            showError(
-                error?.message ||
-                "Something went wrong. Please try again."
-            );
-
-
-        } finally {
-
-            if (aiAskButton) {
-
-                aiAskButton.disabled = false;
-
-                aiAskButton.textContent =
-                    "✨ Ask StudyFlow AI";
-
-            }
 
         }
 
-    };
+
+        if (!data) {
+
+            throw new Error(
+                "No data returned from Study AI."
+            );
+
+        }
 
 
-    /* ==================================================
-       ENTER KEY
-    ================================================== */
+        if (data.error) {
 
-    if (aiInput) {
+            throw new Error(
+                data.error
+            );
 
-        aiInput.addEventListener(
-            "keydown",
-            function (event) {
+        }
 
-                /*
-                 * Enter = Ask AI
-                 * Shift + Enter = New line
-                 */
 
-                if (
-                    event.key === "Enter" &&
-                    !event.shiftKey
-                ) {
+        /* ==================================================
+           GET ANSWER
+        ================================================== */
 
-                    event.preventDefault();
+        let answer =
+            data.answer;
 
-                    window.askStudyAI();
 
-                }
+        /*
+         * Backup response formats
+         */
 
-            }
+        if (
+            !answer &&
+            data.text
+        ) {
+
+            answer =
+                data.text;
+
+        }
+
+
+        if (
+            !answer &&
+            data.response
+        ) {
+
+            answer =
+                data.response;
+
+        }
+
+
+        if (
+            typeof answer !== "string" ||
+            !answer.trim()
+        ) {
+
+            throw new Error(
+                "AI returned an empty answer."
+            );
+
+        }
+
+
+        console.log(
+            "FINAL ANSWER:",
+            answer
         );
+
+
+        /* ==================================================
+           DISPLAY
+        ================================================== */
+
+        showAnswer(answer);
+
+
+    } catch (error) {
+
+        console.error(
+            "STUDY AI ERROR:",
+            error
+        );
+
+
+        showError(
+            error?.message ||
+            "Something went wrong. Please try again."
+        );
+
+
+    } finally {
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "✨ Ask StudyFlow AI";
+
+        }
 
     }
 
-});
+};
+
+
+/* ==================================================
+   BUTTON CLICK
+   IMPORTANT: DIRECT EVENT LISTENER
+================================================== */
+
+if (aiAskButton) {
+
+    aiAskButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            console.log(
+                "BUTTON EVENT FIRED"
+            );
+
+            window.askStudyAI();
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   ENTER KEY
+================================================== */
+
+if (aiInput) {
+
+    aiInput.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                console.log(
+                    "ENTER EVENT FIRED"
+                );
+
+                window.askStudyAI();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   READY
+================================================== */
+
+console.log(
+    "AI event listeners attached."
+);
