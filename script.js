@@ -1,1590 +1,1584 @@
 /* ==================================================
-   STUDYFLOW - TASK SYSTEM + AI
+STUDYFLOW - TASK SYSTEM + AI
 ================================================== */
 
 "use strict";
 
-
 /* ==================================================
-   TASK SYSTEM
+TASK SYSTEM
 ================================================== */
 
 let tasks = [];
 
 let currentDate = new Date();
 
-
 /* ==================================================
-   LOAD USER TASKS
+LOAD USER TASKS
 ================================================== */
 
 async function loadTasks() {
 
-    const {
-        data: {
-            user
-        },
-        error: userError
-    } = await supabaseClient.auth.getUser();
+const {  
+    data: {  
+        user  
+    },  
+    error: userError  
+} = await supabaseClient.auth.getUser();  
 
 
-    if (userError || !user) {
+if (userError || !user) {  
 
-        window.location.replace("login.html");
+    window.location.replace("login.html");  
 
-        return;
-    }
-
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("tasks")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", {
-            ascending: true
-        });
+    return;  
+}  
 
 
-    if (error) {
-
-        console.error(
-            "Error loading tasks:",
-            error
-        );
-
-        alert("Could not load your tasks.");
-
-        return;
-    }
-
-
-    tasks = data || [];
+const {  
+    data,  
+    error  
+} = await supabaseClient  
+    .from("tasks")  
+    .select("*")  
+    .eq("user_id", user.id)  
+    .order("created_at", {  
+        ascending: true  
+    });  
 
 
-    displayTasks();
-    displayCalendar();
-    displayUpcoming();
-    updateStats();
-    updateAIContext();
+if (error) {  
+
+    console.error(  
+        "Error loading tasks:",  
+        error  
+    );  
+
+    alert("Could not load your tasks.");  
+
+    return;  
+}  
+
+
+tasks = data || [];  
+
+
+displayTasks();  
+displayCalendar();  
+displayUpcoming();  
+updateStats();  
+updateAIContext();
+
 }
 
-
 /* ==================================================
-   ADD TASK
+ADD TASK
 ================================================== */
 
 async function addTask() {
 
-    const subject =
-        document.getElementById("subjectInput")?.value.trim();
+const subject =  
+    document.getElementById("subjectInput")?.value.trim();  
 
-    const task =
-        document.getElementById("taskInput")?.value.trim();
+const task =  
+    document.getElementById("taskInput")?.value.trim();  
 
-    const date =
-        document.getElementById("dateInput")?.value;
+const date =  
+    document.getElementById("dateInput")?.value;  
 
-    const priority =
-        document.getElementById("priorityInput")?.value;
-
-
-    if (!subject || !task) {
-
-        alert(
-            "Please enter subject and task!"
-        );
-
-        return;
-    }
+const priority =  
+    document.getElementById("priorityInput")?.value;  
 
 
-    const {
-        data: {
-            user
-        }
-    } =
-        await supabaseClient.auth.getUser();
+if (!subject || !task) {  
+
+    alert(  
+        "Please enter subject and task!"  
+    );  
+
+    return;  
+}  
 
 
-    if (!user) {
-
-        alert("Please login first.");
-
-        window.location.replace(
-            "login.html"
-        );
-
-        return;
-    }
+const {  
+    data: {  
+        user  
+    }  
+} =  
+    await supabaseClient.auth.getUser();  
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("tasks")
-            .insert({
+if (!user) {  
 
-                user_id: user.id,
+    alert("Please login first.");  
 
-                subject: subject,
+    window.location.replace(  
+        "login.html"  
+    );  
 
-                task: task,
-
-                date:
-                    date === ""
-                        ? null
-                        : date,
-
-                priority:
-                    priority || "Low",
-
-                completed: false
-
-            })
-            .select()
-            .single();
+    return;  
+}  
 
 
-    if (error) {
+const {  
+    data,  
+    error  
+} =  
+    await supabaseClient  
+        .from("tasks")  
+        .insert({  
 
-        console.error(
-            "Error adding task:",
-            error
-        );
+            user_id: user.id,  
 
-        alert(
-            "Could not save task."
-        );
+            subject: subject,  
 
-        return;
-    }
+            task: task,  
+
+            date:  
+                date === ""  
+                    ? null  
+                    : date,  
+
+            priority:  
+                priority || "Low",  
+
+            completed: false  
+
+        })  
+        .select()  
+        .single();  
 
 
-    tasks.push(data);
+if (error) {  
+
+    console.error(  
+        "Error adding task:",  
+        error  
+    );  
+
+    alert(  
+        "Could not save task."  
+    );  
+
+    return;  
+}  
 
 
-    clearInputs();
+tasks.push(data);  
 
-    displayTasks();
-    displayCalendar();
-    displayUpcoming();
-    updateStats();
-    updateAIContext();
+
+clearInputs();  
+
+displayTasks();  
+displayCalendar();  
+displayUpcoming();  
+updateStats();  
+updateAIContext();
+
 }
 
-
 /* ==================================================
-   DISPLAY TASKS
+DISPLAY TASKS
 ================================================== */
 
 function displayTasks() {
 
-    const taskList =
-        document.getElementById("taskList");
+const taskList =  
+    document.getElementById("taskList");  
 
 
-    if (!taskList) {
-        return;
-    }
+if (!taskList) {  
+    return;  
+}  
 
 
-    const searchInput =
-        document.getElementById("searchInput");
+const searchInput =  
+    document.getElementById("searchInput");  
 
 
-    const searchText =
-        searchInput
-            ? searchInput.value
-                .toLowerCase()
-                .trim()
-            : "";
+const searchText =  
+    searchInput  
+        ? searchInput.value  
+            .toLowerCase()  
+            .trim()  
+        : "";  
 
 
-    taskList.innerHTML = "";
+taskList.innerHTML = "";  
 
 
-    const filteredTasks =
-        tasks.filter(function (task) {
+const filteredTasks =  
+    tasks.filter(function (task) {  
 
-            const subject =
-                String(task.subject || "")
-                    .toLowerCase();
+        const subject =  
+            String(task.subject || "")  
+                .toLowerCase();  
 
-            const taskName =
-                String(task.task || "")
-                    .toLowerCase();
+        const taskName =  
+            String(task.task || "")  
+                .toLowerCase();  
 
 
-            return (
-                subject.includes(searchText) ||
-                taskName.includes(searchText)
-            );
+        return (  
+            subject.includes(searchText) ||  
+            taskName.includes(searchText)  
+        );  
 
-        });
+    });  
 
 
-    if (filteredTasks.length === 0) {
+if (filteredTasks.length === 0) {  
 
-        const empty =
-            document.createElement("li");
+    const empty =  
+        document.createElement("li");  
 
 
-        empty.className =
-            "empty-task";
+    empty.className =  
+        "empty-task";  
 
 
-        empty.innerHTML = `
-            <div
-                style="
-                    text-align:center;
-                    width:100%;
-                    padding:20px;
-                    color:#64748b;
-                "
-            >
-                📚 No tasks found.
-            </div>
-        `;
+    empty.innerHTML = `  
+        <div  
+            style="  
+                text-align:center;  
+                width:100%;  
+                padding:20px;  
+                color:#64748b;  
+            "  
+        >  
+            📚 No tasks found.  
+        </div>  
+    `;  
 
 
-        taskList.appendChild(empty);
+    taskList.appendChild(empty);  
 
-        updateStats();
+    updateStats();  
 
-        return;
-    }
+    return;  
+}  
 
 
-    filteredTasks.forEach(function (task) {
+filteredTasks.forEach(function (task) {  
 
-        const li =
-            document.createElement("li");
+    const li =  
+        document.createElement("li");  
 
 
-        const taskInfo =
-            document.createElement("div");
+    const taskInfo =  
+        document.createElement("div");  
 
-        taskInfo.className =
-            "task-info";
+    taskInfo.className =  
+        "task-info";  
 
 
-        if (task.completed) {
+    if (task.completed) {  
 
-            taskInfo.classList.add(
-                "completed"
-            );
+        taskInfo.classList.add(  
+            "completed"  
+        );  
 
-        }
+    }  
 
 
-        const subjectText =
-            document.createElement("span");
+    const subjectText =  
+        document.createElement("span");  
 
-        subjectText.className =
-            "subject";
+    subjectText.className =  
+        "subject";  
 
-        subjectText.textContent =
-            task.subject;
+    subjectText.textContent =  
+        task.subject;  
 
 
-        const taskText =
-            document.createElement("span");
+    const taskText =  
+        document.createElement("span");  
 
-        taskText.className =
-            "task-name";
+    taskText.className =  
+        "task-name";  
 
-        taskText.textContent =
-            " — " + task.task;
+    taskText.textContent =  
+        " — " + task.task;  
 
 
-        const priorityText =
-            document.createElement("span");
+    const priorityText =  
+        document.createElement("span");  
 
-        priorityText.className =
-            "priority";
+    priorityText.className =  
+        "priority";  
 
 
-        const priority =
-            String(
-                task.priority || "Low"
-            );
+    const priority =  
+        String(  
+            task.priority || "Low"  
+        );  
 
 
-        priorityText.textContent =
-            priority;
+    priorityText.textContent =  
+        priority;  
 
 
-        if (priority === "High") {
+    if (priority === "High") {  
 
-            priorityText.classList.add(
-                "priority-high"
-            );
+        priorityText.classList.add(  
+            "priority-high"  
+        );  
 
-        } else if (priority === "Medium") {
+    } else if (priority === "Medium") {  
 
-            priorityText.classList.add(
-                "priority-medium"
-            );
+        priorityText.classList.add(  
+            "priority-medium"  
+        );  
 
-        } else {
+    } else {  
 
-            priorityText.classList.add(
-                "priority-low"
-            );
+        priorityText.classList.add(  
+            "priority-low"  
+        );  
 
-        }
+    }  
 
 
-        taskInfo.appendChild(subjectText);
+    taskInfo.appendChild(subjectText);  
 
-        taskInfo.appendChild(taskText);
+    taskInfo.appendChild(taskText);  
 
-        taskInfo.appendChild(priorityText);
+    taskInfo.appendChild(priorityText);  
 
 
-        if (task.date) {
+    if (task.date) {  
 
-            const dateText =
-                document.createElement("span");
+        const dateText =  
+            document.createElement("span");  
 
-            dateText.className =
-                "date";
+        dateText.className =  
+            "date";  
 
-            dateText.textContent =
-                "📅 Due: " +
-                formatDate(task.date);
+        dateText.textContent =  
+            "📅 Due: " +  
+            formatDate(task.date);  
 
-            taskInfo.appendChild(dateText);
+        taskInfo.appendChild(dateText);  
 
-        }
+    }  
 
 
-        const buttons =
-            document.createElement("div");
+    const buttons =  
+        document.createElement("div");  
 
-        buttons.className =
-            "task-buttons";
+    buttons.className =  
+        "task-buttons";  
 
 
-        const completeButton =
-            document.createElement("button");
+    const completeButton =  
+        document.createElement("button");  
 
-        completeButton.type =
-            "button";
+    completeButton.type =  
+        "button";  
 
-        completeButton.textContent =
-            task.completed
-                ? "↩ Undo"
-                : "✓ Complete";
+    completeButton.textContent =  
+        task.completed  
+            ? "↩ Undo"  
+            : "✓ Complete";  
 
 
-        completeButton.onclick =
-            function () {
+    completeButton.onclick =  
+        function () {  
 
-                toggleTask(task.id);
+            toggleTask(task.id);  
 
-            };
+        };  
 
 
-        const editButton =
-            document.createElement("button");
+    const editButton =  
+        document.createElement("button");  
 
-        editButton.type =
-            "button";
+    editButton.type =  
+        "button";  
 
-        editButton.textContent =
-            "✎ Edit";
+    editButton.textContent =  
+        "✎ Edit";  
 
 
-        editButton.onclick =
-            function () {
+    editButton.onclick =  
+        function () {  
 
-                editTask(task.id);
+            editTask(task.id);  
 
-            };
+        };  
 
 
-        const deleteButton =
-            document.createElement("button");
+    const deleteButton =  
+        document.createElement("button");  
 
-        deleteButton.type =
-            "button";
+    deleteButton.type =  
+        "button";  
 
-        deleteButton.className =
-            "delete-btn";
+    deleteButton.className =  
+        "delete-btn";  
 
-        deleteButton.textContent =
-            "Delete";
+    deleteButton.textContent =  
+        "Delete";  
 
 
-        deleteButton.onclick =
-            function () {
+    deleteButton.onclick =  
+        function () {  
 
-                deleteTask(task.id);
+            deleteTask(task.id);  
 
-            };
+        };  
 
 
-        buttons.appendChild(
-            completeButton
-        );
+    buttons.appendChild(  
+        completeButton  
+    );  
 
-        buttons.appendChild(
-            editButton
-        );
+    buttons.appendChild(  
+        editButton  
+    );  
 
-        buttons.appendChild(
-            deleteButton
-        );
+    buttons.appendChild(  
+        deleteButton  
+    );  
 
 
-        li.appendChild(taskInfo);
+    li.appendChild(taskInfo);  
 
-        li.appendChild(buttons);
+    li.appendChild(buttons);  
 
-        taskList.appendChild(li);
+    taskList.appendChild(li);  
 
-    });
+});  
 
 
-    updateStats();
+updateStats();
+
 }
 
-
 /* ==================================================
-   COMPLETE / UNDO TASK
+COMPLETE / UNDO TASK
 ================================================== */
 
 async function toggleTask(id) {
 
-    const task =
-        tasks.find(function (item) {
+const task =  
+    tasks.find(function (item) {  
 
-            return item.id === id;
+        return item.id === id;  
 
-        });
-
-
-    if (!task) {
-        return;
-    }
+    });  
 
 
-    const newCompleted =
-        !task.completed;
+if (!task) {  
+    return;  
+}  
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("tasks")
-            .update({
-                completed: newCompleted
-            })
-            .eq("id", id);
+const newCompleted =  
+    !task.completed;  
 
 
-    if (error) {
-
-        console.error(
-            "Error updating task:",
-            error
-        );
-
-        alert(
-            "Could not update task."
-        );
-
-        return;
-    }
+const {  
+    error  
+} =  
+    await supabaseClient  
+        .from("tasks")  
+        .update({  
+            completed: newCompleted  
+        })  
+        .eq("id", id);  
 
 
-    task.completed =
-        newCompleted;
+if (error) {  
+
+    console.error(  
+        "Error updating task:",  
+        error  
+    );  
+
+    alert(  
+        "Could not update task."  
+    );  
+
+    return;  
+}  
 
 
-    displayTasks();
-    displayCalendar();
-    displayUpcoming();
-    updateStats();
-    updateAIContext();
+task.completed =  
+    newCompleted;  
+
+
+displayTasks();  
+displayCalendar();  
+displayUpcoming();  
+updateStats();  
+updateAIContext();
+
 }
 
-
 /* ==================================================
-   DELETE TASK
+DELETE TASK
 ================================================== */
 
 async function deleteTask(id) {
 
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this task?"
-        );
+const confirmed =  
+    confirm(  
+        "Are you sure you want to delete this task?"  
+    );  
 
 
-    if (!confirmed) {
-        return;
-    }
+if (!confirmed) {  
+    return;  
+}  
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("tasks")
-            .delete()
-            .eq("id", id);
+const {  
+    error  
+} =  
+    await supabaseClient  
+        .from("tasks")  
+        .delete()  
+        .eq("id", id);  
 
 
-    if (error) {
+if (error) {  
 
-        console.error(
-            "Error deleting task:",
-            error
-        );
+    console.error(  
+        "Error deleting task:",  
+        error  
+    );  
 
-        alert(
-            "Could not delete task."
-        );
+    alert(  
+        "Could not delete task."  
+    );  
 
-        return;
-    }
-
-
-    tasks =
-        tasks.filter(function (task) {
-
-            return task.id !== id;
-
-        });
+    return;  
+}  
 
 
-    displayTasks();
-    displayCalendar();
-    displayUpcoming();
-    updateStats();
-    updateAIContext();
+tasks =  
+    tasks.filter(function (task) {  
+
+        return task.id !== id;  
+
+    });  
+
+
+displayTasks();  
+displayCalendar();  
+displayUpcoming();  
+updateStats();  
+updateAIContext();
+
 }
 
-
 /* ==================================================
-   EDIT TASK
+EDIT TASK
 ================================================== */
 
 async function editTask(id) {
 
-    const task =
-        tasks.find(function (item) {
+const task =  
+    tasks.find(function (item) {  
 
-            return item.id === id;
+        return item.id === id;  
 
-        });
-
-
-    if (!task) {
-        return;
-    }
+    });  
 
 
-    const newSubject =
-        prompt(
-            "Enter subject:",
-            task.subject
-        );
+if (!task) {  
+    return;  
+}  
 
 
-    if (newSubject === null) {
-        return;
-    }
+const newSubject =  
+    prompt(  
+        "Enter subject:",  
+        task.subject  
+    );  
 
 
-    const cleanedSubject =
-        newSubject.trim();
+if (newSubject === null) {  
+    return;  
+}  
 
 
-    if (!cleanedSubject) {
-
-        alert(
-            "Subject cannot be empty."
-        );
-
-        return;
-    }
+const cleanedSubject =  
+    newSubject.trim();  
 
 
-    const newTask =
-        prompt(
-            "Enter task:",
-            task.task
-        );
+if (!cleanedSubject) {  
+
+    alert(  
+        "Subject cannot be empty."  
+    );  
+
+    return;  
+}  
 
 
-    if (newTask === null) {
-        return;
-    }
+const newTask =  
+    prompt(  
+        "Enter task:",  
+        task.task  
+    );  
 
 
-    const cleanedTask =
-        newTask.trim();
+if (newTask === null) {  
+    return;  
+}  
 
 
-    if (!cleanedTask) {
-
-        alert(
-            "Task cannot be empty."
-        );
-
-        return;
-    }
+const cleanedTask =  
+    newTask.trim();  
 
 
-    const newDate =
-        prompt(
-            "Enter date (YYYY-MM-DD), or leave empty:",
-            task.date || ""
-        );
+if (!cleanedTask) {  
+
+    alert(  
+        "Task cannot be empty."  
+    );  
+
+    return;  
+}  
 
 
-    if (newDate === null) {
-        return;
-    }
+const newDate =  
+    prompt(  
+        "Enter date (YYYY-MM-DD), or leave empty:",  
+        task.date || ""  
+    );  
 
 
-    const cleanedDate =
-        newDate.trim();
+if (newDate === null) {  
+    return;  
+}  
 
 
-    const newPriority =
-        prompt(
-            "Enter priority (Low / Medium / High):",
-            task.priority || "Low"
-        );
+const cleanedDate =  
+    newDate.trim();  
 
 
-    if (newPriority === null) {
-        return;
-    }
+const newPriority =  
+    prompt(  
+        "Enter priority (Low / Medium / High):",  
+        task.priority || "Low"  
+    );  
 
 
-    let cleanedPriority =
-        newPriority.trim();
+if (newPriority === null) {  
+    return;  
+}  
 
 
-    if (
-        !["Low", "Medium", "High"]
-            .includes(cleanedPriority)
-    ) {
-
-        cleanedPriority = "Low";
-
-    }
+let cleanedPriority =  
+    newPriority.trim();  
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("tasks")
-            .update({
+if (  
+    !["Low", "Medium", "High"]  
+        .includes(cleanedPriority)  
+) {  
 
-                subject:
-                    cleanedSubject,
+    cleanedPriority = "Low";  
 
-                task:
-                    cleanedTask,
-
-                date:
-                    cleanedDate === ""
-                        ? null
-                        : cleanedDate,
-
-                priority:
-                    cleanedPriority
-
-            })
-            .eq("id", id);
+}  
 
 
-    if (error) {
+const {  
+    error  
+} =  
+    await supabaseClient  
+        .from("tasks")  
+        .update({  
 
-        console.error(
-            "Error editing task:",
-            error
-        );
+            subject:  
+                cleanedSubject,  
 
-        alert(
-            "Could not edit task."
-        );
+            task:  
+                cleanedTask,  
 
-        return;
-    }
+            date:  
+                cleanedDate === ""  
+                    ? null  
+                    : cleanedDate,  
 
+            priority:  
+                cleanedPriority  
 
-    task.subject =
-        cleanedSubject;
-
-    task.task =
-        cleanedTask;
-
-    task.date =
-        cleanedDate === ""
-            ? null
-            : cleanedDate;
-
-    task.priority =
-        cleanedPriority;
+        })  
+        .eq("id", id);  
 
 
-    displayTasks();
-    displayCalendar();
-    displayUpcoming();
-    updateStats();
-    updateAIContext();
+if (error) {  
+
+    console.error(  
+        "Error editing task:",  
+        error  
+    );  
+
+    alert(  
+        "Could not edit task."  
+    );  
+
+    return;  
+}  
+
+
+task.subject =  
+    cleanedSubject;  
+
+task.task =  
+    cleanedTask;  
+
+task.date =  
+    cleanedDate === ""  
+        ? null  
+        : cleanedDate;  
+
+task.priority =  
+    cleanedPriority;  
+
+
+displayTasks();  
+displayCalendar();  
+displayUpcoming();  
+updateStats();  
+updateAIContext();
+
 }
 
-
 /* ==================================================
-   CLEAR COMPLETED TASKS
+CLEAR COMPLETED TASKS
 ================================================== */
 
 async function clearCompletedTasks() {
 
-    const completedTasks =
-        tasks.filter(function (task) {
+const completedTasks =  
+    tasks.filter(function (task) {  
 
-            return task.completed;
+        return task.completed;  
 
-        });
-
-
-    if (completedTasks.length === 0) {
-
-        alert(
-            "There are no completed tasks to clear."
-        );
-
-        return;
-    }
+    });  
 
 
-    const confirmed =
-        confirm(
-            "Delete all completed tasks?"
-        );
+if (completedTasks.length === 0) {  
+
+    alert(  
+        "There are no completed tasks to clear."  
+    );  
+
+    return;  
+}  
 
 
-    if (!confirmed) {
-        return;
-    }
+const confirmed =  
+    confirm(  
+        "Delete all completed tasks?"  
+    );  
 
 
-    const ids =
-        completedTasks.map(function (task) {
-
-            return task.id;
-
-        });
+if (!confirmed) {  
+    return;  
+}  
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("tasks")
-            .delete()
-            .in("id", ids);
+const ids =  
+    completedTasks.map(function (task) {  
+
+        return task.id;  
+
+    });  
 
 
-    if (error) {
-
-        console.error(
-            "Error clearing completed tasks:",
-            error
-        );
-
-        alert(
-            "Could not clear completed tasks."
-        );
-
-        return;
-    }
+const {  
+    error  
+} =  
+    await supabaseClient  
+        .from("tasks")  
+        .delete()  
+        .in("id", ids);  
 
 
-    tasks =
-        tasks.filter(function (task) {
+if (error) {  
 
-            return !task.completed;
+    console.error(  
+        "Error clearing completed tasks:",  
+        error  
+    );  
 
-        });
+    alert(  
+        "Could not clear completed tasks."  
+    );  
+
+    return;  
+}  
 
 
-    displayTasks();
-    displayCalendar();
-    displayUpcoming();
-    updateStats();
-    updateAIContext();
+tasks =  
+    tasks.filter(function (task) {  
+
+        return !task.completed;  
+
+    });  
+
+
+displayTasks();  
+displayCalendar();  
+displayUpcoming();  
+updateStats();  
+updateAIContext();
+
 }
 
-
 /* ==================================================
-   STATISTICS
+STATISTICS
 ================================================== */
 
 function updateStats() {
 
-    const total =
-        tasks.length;
+const total =  
+    tasks.length;  
 
 
-    const completed =
-        tasks.filter(function (task) {
+const completed =  
+    tasks.filter(function (task) {  
 
-            return task.completed;
+        return task.completed;  
 
-        }).length;
-
-
-    const pending =
-        total - completed;
+    }).length;  
 
 
-    const percentage =
-        total === 0
-            ? 0
-            : Math.round(
-                (completed / total) * 100
-            );
+const pending =  
+    total - completed;  
 
 
-    const totalElement =
-        document.getElementById(
-            "totalTasks"
-        );
+const percentage =  
+    total === 0  
+        ? 0  
+        : Math.round(  
+            (completed / total) * 100  
+        );  
 
 
-    const completedElement =
-        document.getElementById(
-            "completedTasks"
-        );
+const totalElement =  
+    document.getElementById(  
+        "totalTasks"  
+    );  
 
 
-    const pendingElement =
-        document.getElementById(
-            "pendingTasks"
-        );
+const completedElement =  
+    document.getElementById(  
+        "completedTasks"  
+    );  
 
 
-    const progressElement =
-        document.getElementById(
-            "progressPercent"
-        );
+const pendingElement =  
+    document.getElementById(  
+        "pendingTasks"  
+    );  
 
 
-    const progressText =
-        document.getElementById(
-            "progress"
-        );
+const progressElement =  
+    document.getElementById(  
+        "progressPercent"  
+    );  
 
 
-    if (totalElement) {
-
-        totalElement.textContent =
-            total;
-
-    }
+const progressText =  
+    document.getElementById(  
+        "progress"  
+    );  
 
 
-    if (completedElement) {
+if (totalElement) {  
 
-        completedElement.textContent =
-            completed;
+    totalElement.textContent =  
+        total;  
 
-    }
-
-
-    if (pendingElement) {
-
-        pendingElement.textContent =
-            pending;
-
-    }
+}  
 
 
-    if (progressElement) {
+if (completedElement) {  
 
-        progressElement.textContent =
-            percentage + "%";
+    completedElement.textContent =  
+        completed;  
 
-    }
+}  
 
 
-    if (progressText) {
+if (pendingElement) {  
 
-        progressText.textContent =
-            "Completed: " +
-            completed +
-            " / " +
-            total;
+    pendingElement.textContent =  
+        pending;  
 
-    }
+}  
+
+
+if (progressElement) {  
+
+    progressElement.textContent =  
+        percentage + "%";  
+
+}  
+
+
+if (progressText) {  
+
+    progressText.textContent =  
+        "Completed: " +  
+        completed +  
+        " / " +  
+        total;  
+
 }
 
+}
 
 /* ==================================================
-   CLEAR INPUTS
+CLEAR INPUTS
 ================================================== */
 
 function clearInputs() {
 
-    const subject =
-        document.getElementById(
-            "subjectInput"
-        );
+const subject =  
+    document.getElementById(  
+        "subjectInput"  
+    );  
 
-    const task =
-        document.getElementById(
-            "taskInput"
-        );
+const task =  
+    document.getElementById(  
+        "taskInput"  
+    );  
 
-    const date =
-        document.getElementById(
-            "dateInput"
-        );
+const date =  
+    document.getElementById(  
+        "dateInput"  
+    );  
 
-    const priority =
-        document.getElementById(
-            "priorityInput"
-        );
+const priority =  
+    document.getElementById(  
+        "priorityInput"  
+    );  
 
 
-    if (subject) subject.value = "";
+if (subject) subject.value = "";  
 
-    if (task) task.value = "";
+if (task) task.value = "";  
 
-    if (date) date.value = "";
+if (date) date.value = "";  
 
-    if (priority) {
-        priority.value = "Low";
-    }
+if (priority) {  
+    priority.value = "Low";  
 }
 
+}
 
 /* ==================================================
-   UPCOMING DEADLINES
+UPCOMING DEADLINES
 ================================================== */
 
 function displayUpcoming() {
 
-    const upcomingList =
-        document.getElementById(
-            "upcomingList"
-        );
+const upcomingList =  
+    document.getElementById(  
+        "upcomingList"  
+    );  
 
 
-    if (!upcomingList) {
-        return;
-    }
+if (!upcomingList) {  
+    return;  
+}  
 
 
-    upcomingList.innerHTML = "";
+upcomingList.innerHTML = "";  
 
 
-    const today =
-        new Date();
+const today =  
+    new Date();  
 
 
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+today.setHours(  
+    0,  
+    0,  
+    0,  
+    0  
+);  
 
 
-    const upcoming =
-        tasks
-            .filter(function (task) {
+const upcoming =  
+    tasks  
+        .filter(function (task) {  
 
-                if (
-                    !task.date ||
-                    task.completed
-                ) {
+            if (  
+                !task.date ||  
+                task.completed  
+            ) {  
 
-                    return false;
+                return false;  
 
-                }
-
-
-                const taskDate =
-                    new Date(
-                        task.date +
-                        "T00:00:00"
-                    );
+            }  
 
 
-                return taskDate >= today;
-
-            })
-            .sort(function (a, b) {
-
-                return (
-                    new Date(
-                        a.date +
-                        "T00:00:00"
-                    ) -
-                    new Date(
-                        b.date +
-                        "T00:00:00"
-                    )
-                );
-
-            })
-            .slice(0, 5);
+            const taskDate =  
+                new Date(  
+                    task.date +  
+                    "T00:00:00"  
+                );  
 
 
-    if (upcoming.length === 0) {
+            return taskDate >= today;  
 
-        upcomingList.innerHTML = `
-            <p class="empty-message">
-                🎉 No upcoming deadlines.
-            </p>
-        `;
+        })  
+        .sort(function (a, b) {  
 
-        return;
-    }
+            return (  
+                new Date(  
+                    a.date +  
+                    "T00:00:00"  
+                ) -  
+                new Date(  
+                    b.date +  
+                    "T00:00:00"  
+                )  
+            );  
 
-
-    upcoming.forEach(function (task) {
-
-        const item =
-            document.createElement("div");
-
-        item.className =
-            "deadline-item";
-
-
-        const left =
-            document.createElement("div");
+        })  
+        .slice(0, 5);  
 
 
-        const subject =
-            document.createElement("div");
+if (upcoming.length === 0) {  
 
-        subject.className =
-            "deadline-subject";
+    upcomingList.innerHTML = `  
+        <p class="empty-message">  
+            🎉 No upcoming deadlines.  
+        </p>  
+    `;  
 
-        subject.textContent =
-            task.subject +
-            " — " +
-            task.task;
-
-
-        const priority =
-            document.createElement("div");
-
-        priority.className =
-            "deadline-date";
-
-        priority.textContent =
-            "Priority: " +
-            task.priority;
+    return;  
+}  
 
 
-        left.appendChild(subject);
+upcoming.forEach(function (task) {  
 
-        left.appendChild(priority);
+    const item =  
+        document.createElement("div");  
 
-
-        const date =
-            document.createElement("div");
-
-        date.className =
-            "deadline-date";
-
-        date.textContent =
-            formatDate(task.date);
+    item.className =  
+        "deadline-item";  
 
 
-        item.appendChild(left);
+    const left =  
+        document.createElement("div");  
 
-        item.appendChild(date);
 
-        upcomingList.appendChild(item);
+    const subject =  
+        document.createElement("div");  
 
-    });
+    subject.className =  
+        "deadline-subject";  
+
+    subject.textContent =  
+        task.subject +  
+        " — " +  
+        task.task;  
+
+
+    const priority =  
+        document.createElement("div");  
+
+    priority.className =  
+        "deadline-date";  
+
+    priority.textContent =  
+        "Priority: " +  
+        task.priority;  
+
+
+    left.appendChild(subject);  
+
+    left.appendChild(priority);  
+
+
+    const date =  
+        document.createElement("div");  
+
+    date.className =  
+        "deadline-date";  
+
+    date.textContent =  
+        formatDate(task.date);  
+
+
+    item.appendChild(left);  
+
+    item.appendChild(date);  
+
+    upcomingList.appendChild(item);  
+
+});
+
 }
 
-
 /* ==================================================
-   CALENDAR
+CALENDAR
 ================================================== */
 
 function displayCalendar() {
 
-    const calendar =
-        document.getElementById(
-            "calendar"
-        );
+const calendar =  
+    document.getElementById(  
+        "calendar"  
+    );  
 
 
-    const monthTitle =
-        document.getElementById(
-            "monthTitle"
-        );
+const monthTitle =  
+    document.getElementById(  
+        "monthTitle"  
+    );  
 
 
-    if (!calendar || !monthTitle) {
-        return;
-    }
+if (!calendar || !monthTitle) {  
+    return;  
+}  
 
 
-    calendar.innerHTML = "";
+calendar.innerHTML = "";  
 
 
-    const year =
-        currentDate.getFullYear();
+const year =  
+    currentDate.getFullYear();  
 
 
-    const month =
-        currentDate.getMonth();
+const month =  
+    currentDate.getMonth();  
 
 
-    const monthName =
-        currentDate.toLocaleString(
-            "default",
-            {
-                month: "long"
-            }
-        );
+const monthName =  
+    currentDate.toLocaleString(  
+        "default",  
+        {  
+            month: "long"  
+        }  
+    );  
 
 
-    monthTitle.textContent =
-        monthName +
-        " " +
-        year;
+monthTitle.textContent =  
+    monthName +  
+    " " +  
+    year;  
 
 
-    const firstDay =
-        new Date(
-            year,
-            month,
-            1
-        ).getDay();
+const firstDay =  
+    new Date(  
+        year,  
+        month,  
+        1  
+    ).getDay();  
 
 
-    const daysInMonth =
-        new Date(
-            year,
-            month + 1,
-            0
-        ).getDate();
+const daysInMonth =  
+    new Date(  
+        year,  
+        month + 1,  
+        0  
+    ).getDate();  
 
 
-    for (
-        let i = 0;
-        i < firstDay;
-        i++
-    ) {
+for (  
+    let i = 0;  
+    i < firstDay;  
+    i++  
+) {  
 
-        const empty =
-            document.createElement("div");
+    const empty =  
+        document.createElement("div");  
 
-        empty.className =
-            "calendar-day empty";
+    empty.className =  
+        "calendar-day empty";  
 
-        calendar.appendChild(empty);
+    calendar.appendChild(empty);  
 
-    }
-
-
-    for (
-        let day = 1;
-        day <= daysInMonth;
-        day++
-    ) {
-
-        const cell =
-            document.createElement("div");
-
-        cell.className =
-            "calendar-day";
+}  
 
 
-        const dayNumber =
-            document.createElement("div");
+for (  
+    let day = 1;  
+    day <= daysInMonth;  
+    day++  
+) {  
 
-        dayNumber.className =
-            "day-number";
+    const cell =  
+        document.createElement("div");  
 
-        dayNumber.textContent =
-            day;
-
-
-        cell.appendChild(dayNumber);
-
-
-        const dateString =
-            year +
-            "-" +
-            String(month + 1).padStart(2, "0") +
-            "-" +
-            String(day).padStart(2, "0");
+    cell.className =  
+        "calendar-day";  
 
 
-        const today =
-            new Date();
+    const dayNumber =  
+        document.createElement("div");  
+
+    dayNumber.className =  
+        "day-number";  
+
+    dayNumber.textContent =  
+        day;  
 
 
-        if (
-            day === today.getDate() &&
-            month === today.getMonth() &&
-            year === today.getFullYear()
-        ) {
-
-            cell.classList.add("today");
-
-        }
+    cell.appendChild(dayNumber);  
 
 
-        const dayTasks =
-            tasks.filter(function (task) {
-
-                return task.date === dateString;
-
-            });
-
-
-        dayTasks.forEach(function (task) {
-
-            const taskElement =
-                document.createElement("span");
-
-            taskElement.className =
-                "calendar-task";
-
-            taskElement.textContent =
-                task.subject +
-                ": " +
-                task.task;
+    const dateString =  
+        year +  
+        "-" +  
+        String(month + 1).padStart(2, "0") +  
+        "-" +  
+        String(day).padStart(2, "0");  
 
 
-            if (task.completed) {
-
-                taskElement.style.textDecoration =
-                    "line-through";
-
-                taskElement.style.opacity =
-                    "0.5";
-
-            }
+    const today =  
+        new Date();  
 
 
-            cell.appendChild(taskElement);
+    if (  
+        day === today.getDate() &&  
+        month === today.getMonth() &&  
+        year === today.getFullYear()  
+    ) {  
 
-        });
+        cell.classList.add("today");  
+
+    }  
 
 
-        calendar.appendChild(cell);
+    const dayTasks =  
+        tasks.filter(function (task) {  
 
-    }
+            return task.date === dateString;  
+
+        });  
+
+
+    dayTasks.forEach(function (task) {  
+
+        const taskElement =  
+            document.createElement("span");  
+
+        taskElement.className =  
+            "calendar-task";  
+
+        taskElement.textContent =  
+            task.subject +  
+            ": " +  
+            task.task;  
+
+
+        if (task.completed) {  
+
+            taskElement.style.textDecoration =  
+                "line-through";  
+
+            taskElement.style.opacity =  
+                "0.5";  
+
+        }  
+
+
+        cell.appendChild(taskElement);  
+
+    });  
+
+
+    calendar.appendChild(cell);  
+
 }
 
+}
 
 /* ==================================================
-   MONTH NAVIGATION
+MONTH NAVIGATION
 ================================================== */
 
 function previousMonth() {
 
-    currentDate.setMonth(
-        currentDate.getMonth() - 1
-    );
+currentDate.setMonth(  
+    currentDate.getMonth() - 1  
+);  
 
-    displayCalendar();
+displayCalendar();
+
 }
-
 
 function nextMonth() {
 
-    currentDate.setMonth(
-        currentDate.getMonth() + 1
-    );
+currentDate.setMonth(  
+    currentDate.getMonth() + 1  
+);  
 
-    displayCalendar();
+displayCalendar();
+
 }
 
-
 /* ==================================================
-   FORMAT DATE
+FORMAT DATE
 ================================================== */
 
 function formatDate(dateString) {
 
-    if (!dateString) {
-        return "";
-    }
+if (!dateString) {  
+    return "";  
+}  
 
 
-    const date =
-        new Date(
-            dateString +
-            "T00:00:00"
-        );
+const date =  
+    new Date(  
+        dateString +  
+        "T00:00:00"  
+    );  
 
 
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
+if (  
+    Number.isNaN(  
+        date.getTime()  
+    )  
+) {  
 
-        return dateString;
+    return dateString;  
 
-    }
+}  
 
 
-    return date.toLocaleDateString(
-        "en-US",
-        {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
-        }
-    );
+return date.toLocaleDateString(  
+    "en-US",  
+    {  
+        day: "numeric",  
+        month: "short",  
+        year: "numeric"  
+    }  
+);
+
 }
 
-
 /* ==================================================
-   DARK MODE
+DARK MODE
 ================================================== */
 
 function updateThemeButton() {
 
-    const button =
-        document.getElementById(
-            "themeButton"
-        );
+const button =  
+    document.getElementById(  
+        "themeButton"  
+    );  
 
 
-    if (!button) {
-        return;
-    }
+if (!button) {  
+    return;  
+}  
 
 
-    const isDark =
-        document.body.classList.contains(
-            "dark"
-        );
+const isDark =  
+    document.body.classList.contains(  
+        "dark"  
+    );  
 
 
-    button.textContent =
-        isDark
-            ? "☀ Light"
-            : "🌙 Dark";
+button.textContent =  
+    isDark  
+        ? "☀ Light"  
+        : "🌙 Dark";
+
 }
-
 
 function toggleTheme() {
 
-    document.body.classList.toggle(
-        "dark"
-    );
+document.body.classList.toggle(  
+    "dark"  
+);  
 
 
-    const isDark =
-        document.body.classList.contains(
-            "dark"
-        );
+const isDark =  
+    document.body.classList.contains(  
+        "dark"  
+    );  
 
 
-    localStorage.setItem(
-        "darkMode",
-        isDark ? "true" : "false"
-    );
-
-
-    updateThemeButton();
-}
-
-
-if (
-    localStorage.getItem(
-        "darkMode"
-    ) === "true"
-) {
-
-    document.body.classList.add(
-        "dark"
-    );
-}
+localStorage.setItem(  
+    "darkMode",  
+    isDark ? "true" : "false"  
+);  
 
 
 updateThemeButton();
 
+}
+
+if (
+localStorage.getItem(
+"darkMode"
+) === "true"
+) {
+
+document.body.classList.add(  
+    "dark"  
+);
+
+}
+
+updateThemeButton();
 
 /* ==================================================
-   TASK ENTER KEY
+TASK ENTER KEY
 ================================================== */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+"DOMContentLoaded",
+function () {
 
-        const subjectInput =
-            document.getElementById(
-                "subjectInput"
-            );
-
-
-        const taskInput =
-            document.getElementById(
-                "taskInput"
-            );
+const subjectInput =  
+        document.getElementById(  
+            "subjectInput"  
+        );  
 
 
-        function handleEnter(event) {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                addTask();
-
-            }
-
-        }
+    const taskInput =  
+        document.getElementById(  
+            "taskInput"  
+        );  
 
 
-        if (subjectInput) {
+    function handleEnter(event) {  
 
-            subjectInput.addEventListener(
-                "keydown",
-                handleEnter
-            );
+        if (  
+            event.key === "Enter"  
+        ) {  
 
-        }
+            event.preventDefault();  
+
+            addTask();  
+
+        }  
+
+    }  
 
 
-        if (taskInput) {
+    if (subjectInput) {  
 
-            taskInput.addEventListener(
-                "keydown",
-                handleEnter
-            );
+        subjectInput.addEventListener(  
+            "keydown",  
+            handleEnter  
+        );  
 
-        }
+    }  
 
-    }
+
+    if (taskInput) {  
+
+        taskInput.addEventListener(  
+            "keydown",  
+            handleEnter  
+        );  
+
+    }  
+
+}
+
 );
 
-
 /* ==================================================
-   AI SYSTEM
+AI SYSTEM
 ================================================== */
 
 const AI_FUNCTION_NAME =
-    "study-ai";
-
+"study-ai";
 
 /* ==================================================
-   AI CONTEXT
+AI CONTEXT
 ================================================== */
 
 function updateAIContext() {
 
-    const aiContext =
-        document.getElementById(
-            "aiTaskContext"
-        );
+const aiContext =  
+    document.getElementById(  
+        "aiTaskContext"  
+    );  
 
 
-    if (!aiContext) {
-        return;
-    }
+if (!aiContext) {  
+    return;  
+}  
 
 
-    const total =
-        tasks.length;
+const total =  
+    tasks.length;  
 
 
-    const completed =
-        tasks.filter(function (task) {
+const completed =  
+    tasks.filter(function (task) {  
 
-            return task.completed;
+        return task.completed;  
 
-        }).length;
-
-
-    const pending =
-        total - completed;
+    }).length;  
 
 
-    const upcoming =
-        tasks
-            .filter(function (task) {
-
-                return (
-                    task.date &&
-                    !task.completed
-                );
-
-            })
-            .sort(function (a, b) {
-
-                return (
-                    new Date(a.date) -
-                    new Date(b.date)
-                );
-
-            })
-            .slice(0, 5);
+const pending =  
+    total - completed;  
 
 
-    aiContext.textContent =
-        `
+const upcoming =  
+    tasks  
+        .filter(function (task) {  
+
+            return (  
+                task.date &&  
+                !task.completed  
+            );  
+
+        })  
+        .sort(function (a, b) {  
+
+            return (  
+                new Date(a.date) -  
+                new Date(b.date)  
+            );  
+
+        })  
+        .slice(0, 5);  
+
+
+aiContext.textContent =  
+    `
+
 Total tasks: ${total}
 Completed: ${completed}
 Pending: ${pending}
 
 Upcoming:
 ${
-    upcoming.length
-        ? upcoming
-            .map(function (task) {
+upcoming.length
+? upcoming
+.map(function (task) {
 
-                return (
-                    `${task.subject} - ` +
-                    `${task.task} - ` +
-                    `${task.date || "No date"}`
-                );
+return (  
+                `${task.subject} - ` +  
+                `${task.task} - ` +  
+                `${task.date || "No date"}`  
+            );  
 
-            })
-            .join("\n")
-        : "No upcoming tasks."
+        })  
+        .join("\n")  
+    : "No upcoming tasks."
+
 }
-        `.trim();
+`.trim();
 }
-
 
 /* ==================================================
-   AI RESPONSE DISPLAY
+AI RESPONSE DISPLAY
 ================================================== */
-
 function displayAIAnswer(answer) {
 
     const output =
-        document.getElementById(
-            "aiResponse"
-        );
+        document.getElementById("aiResponse");
 
 
     if (!output) {
@@ -1597,8 +1591,189 @@ function displayAIAnswer(answer) {
     }
 
 
-    output.textContent =
-        answer;
+    const text =
+        String(answer || "")
+            .replace(/\r\n/g, "\n")
+            .replace(/\r/g, "\n")
+            .trim();
+
+
+    /*
+       Convert AI Markdown into readable HTML.
+       This keeps the answer structured instead of
+       showing everything as one paragraph.
+    */
+
+    let html =
+        text
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            );
+
+
+    /* Bold: **text** */
+
+    html =
+        html.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
+
+
+    /* Headings */
+
+    html =
+        html.replace(
+            /^### (.*)$/gm,
+            "<h4>$1</h4>"
+        );
+
+
+    html =
+        html.replace(
+            /^## (.*)$/gm,
+            "<h3>$1</h3>"
+        );
+
+
+    html =
+        html.replace(
+            /^# (.*)$/gm,
+            "<h2>$1</h2>"
+        );
+
+
+    /*
+       Numbered lists
+       1. text
+       2. text
+    */
+
+    html =
+        html.replace(
+            /^(?:\d+\.\s+.*(?:\n|$))+/gm,
+            function (block) {
+
+                const items =
+                    block
+                        .trim()
+                        .split("\n")
+                        .filter(Boolean)
+                        .map(function (line) {
+
+                            return (
+                                "<li>" +
+                                line.replace(
+                                    /^\d+\.\s+/,
+                                    ""
+                                ) +
+                                "</li>"
+                            );
+
+                        })
+                        .join("");
+
+
+                return (
+                    "<ol>" +
+                    items +
+                    "</ol>"
+                );
+
+            }
+        );
+
+
+    /*
+       Bullet lists
+       - item
+       * item
+    */
+
+    html =
+        html.replace(
+            /^(?:[-*]\s+.*(?:\n|$))+/gm,
+            function (block) {
+
+                const items =
+                    block
+                        .trim()
+                        .split("\n")
+                        .filter(Boolean)
+                        .map(function (line) {
+
+                            return (
+                                "<li>" +
+                                line.replace(
+                                    /^[-*]\s+/,
+                                    ""
+                                ) +
+                                "</li>"
+                            );
+
+                        })
+                        .join("");
+
+
+                return (
+                    "<ul>" +
+                    items +
+                    "</ul>"
+                );
+
+            }
+        );
+
+
+    /*
+       Remaining line breaks become real
+       paragraphs / line breaks.
+    */
+
+    html =
+        html.replace(
+            /\n{2,}/g,
+            "<br><br>"
+        );
+
+
+    html =
+        html.replace(
+            /\n/g,
+            "<br>"
+        );
+
+
+    output.innerHTML = `
+
+        <div class="ai-demo-response">
+
+            <div class="ai-response-title">
+                🤖 StudyFlow AI
+            </div>
+
+            <div
+                class="ai-answer"
+                style="
+                    white-space: normal;
+                    line-height: 1.7;
+                "
+            >
+                ${html}
+            </div>
+
+        </div>
+
+    `;
 
 
     output.style.display =
@@ -1609,521 +1784,542 @@ function displayAIAnswer(answer) {
         behavior: "smooth",
         block: "nearest"
     });
+
+
+    console.log(
+        "StudyFlow AI: formatted answer displayed successfully."
+    );
 }
 
-
 /* ==================================================
-   AI STATUS
+AI STATUS
 ================================================== */
 
 function showAIStatus(message) {
 
-    const status =
-        document.getElementById(
-            "aiStatus"
-        );
+const status =  
+    document.getElementById(  
+        "aiStatus"  
+    );  
 
 
-    if (status) {
+if (status) {  
 
-        status.textContent =
-            message;
+    status.textContent =  
+        message;  
 
-    }
 }
 
+}
 
 /* ==================================================
-   MAIN AI REQUEST
+MAIN AI REQUEST
 ================================================== */
 
 window.askStudyAI = async function () {
 
-    const input =
-        document.getElementById(
-            "aiInput"
-        );
+const input =  
+    document.getElementById(  
+        "aiInput"  
+    );  
 
 
-    const output =
-        document.getElementById(
-            "aiResponse"
-        );
+const output =  
+    document.getElementById(  
+        "aiResponse"  
+    );  
 
 
-    const button =
-        document.getElementById(
-            "aiAskButton"
-        );
+const button =  
+    document.getElementById(  
+        "aiAskButton"  
+    );  
 
 
-    if (!input) {
+if (!input) {  
 
-        console.error(
-            "StudyFlow AI: aiInput not found."
-        );
+    console.error(  
+        "StudyFlow AI: aiInput not found."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
 
-    const question =
-        input.value.trim();
+const question =  
+    input.value.trim();  
 
 
-    if (!question) {
+if (!question) {  
 
-        showAIStatus(
-            "Please enter a question first."
-        );
+    showAIStatus(  
+        "Please enter a question first."  
+    );  
 
-        input.focus();
+    input.focus();  
 
-        return;
-    }
+    return;  
+}  
 
 
-    if (question.length > 3000) {
+if (question.length > 3000) {  
 
-        alert(
-            "Please keep your question under 3000 characters."
-        );
+    alert(  
+        "Please keep your question under 3000 characters."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
 
-    /* ==========================================
-       BUTTON LOADING
-    ========================================== */
+/* ==========================================  
+   BUTTON LOADING  
+========================================== */  
 
-    if (button) {
+if (button) {  
 
-        button.disabled =
-            true;
+    button.disabled =  
+        true;  
 
-        button.textContent =
-            "⏳ Thinking...";
+    button.textContent =  
+        "⏳ Thinking...";  
 
-    }
+}  
 
 
-    if (output) {
+if (output) {  
 
-        output.style.display =
-            "block";
+    output.style.display =  
+        "block";  
 
-        output.textContent =
-            "🤖 StudyFlow AI is thinking...";
+    output.textContent =  
+        "🤖 StudyFlow AI is thinking...";  
 
-    }
+}  
 
 
-    showAIStatus(
-        "🤖 StudyFlow AI is thinking..."
-    );
+showAIStatus(  
+    "🤖 StudyFlow AI is thinking..."  
+);  
 
 
-    try {
+try {  
 
-        /* ==========================================
-           CHECK SUPABASE
-        ========================================== */
+    /* ==========================================  
+       CHECK SUPABASE  
+    ========================================== */  
 
-        if (
-            typeof supabaseClient === "undefined" ||
-            !supabaseClient
-        ) {
+    if (  
+        typeof supabaseClient === "undefined" ||  
+        !supabaseClient  
+    ) {  
 
-            throw new Error(
-                "Supabase client is not available."
-            );
+        throw new Error(  
+            "Supabase client is not available."  
+        );  
 
-        }
+    }  
 
 
-        console.log(
-            "StudyFlow AI: sending question:",
-            question
-        );
+    console.log(  
+        "StudyFlow AI: sending question:",  
+        question  
+    );  
 
 
-        /* ==========================================
-           CALL EDGE FUNCTION
-        ========================================== */
+    /* ==========================================  
+       CALL EDGE FUNCTION  
+    ========================================== */  
 
-        const result =
-            await supabaseClient.functions.invoke(
-                AI_FUNCTION_NAME,
-                {
-                    body: {
+    const result =  
+        await supabaseClient.functions.invoke(  
+            AI_FUNCTION_NAME,  
+            {  
+                body: {  
 
-                        question:
-                            question
+                    question:  
+                        question  
 
-                    }
-                }
-            );
+                }  
+            }  
+        );  
 
 
-        console.log(
-            "StudyFlow AI result:",
-            result
-        );
+    console.log(  
+        "StudyFlow AI result:",  
+        result  
+    );  
 
 
-        const data =
-            result?.data;
+    const data =  
+        result?.data;  
 
 
-        const error =
-            result?.error;
+    const error =  
+        result?.error;  
 
 
-        /* ==========================================
-           SUPABASE ERROR
-        ========================================== */
+    /* ==========================================  
+       SUPABASE ERROR  
+    ========================================== */  
 
-        if (error) {
+    if (error) {  
 
-            console.error(
-                "Supabase Function Error:",
-                error
-            );
+        console.error(  
+            "Supabase Function Error:",  
+            error  
+        );  
 
-            throw new Error(
-                error.message ||
-                "Study AI request failed."
-            );
+        throw new Error(  
+            error.message ||  
+            "Study AI request failed."  
+        );  
 
-        }
+    }  
 
 
-        if (!data) {
+    if (!data) {  
 
-            throw new Error(
-                "No data returned from Study AI."
-            );
+        throw new Error(  
+            "No data returned from Study AI."  
+        );  
 
-        }
+    }  
 
 
-        console.log(
-            "StudyFlow AI data:",
-            data
-        );
+    console.log(  
+        "StudyFlow AI data:",  
+        data  
+    );  
 
 
-        /* ==========================================
-           GET ANSWER
-        ========================================== */
+    /* ==========================================  
+       GET ANSWER  
+    ========================================== */  
 
-        const answer =
-            data.answer ||
-            data.message ||
-            data.text;
+    const answer =  
+        data.answer ||  
+        data.message ||  
+        data.text;  
 
 
-        if (
-            typeof answer !== "string" ||
-            !answer.trim()
-        ) {
+    if (  
+        typeof answer !== "string" ||  
+        !answer.trim()  
+    ) {  
 
-            throw new Error(
-                "AI returned no answer."
-            );
+        throw new Error(  
+            "AI returned no answer."  
+        );  
 
-        }
+    }  
 
 
-        /* ==========================================
-           SHOW ANSWER
-        ========================================== */
+    /* ==========================================  
+       SHOW ANSWER  
+    ========================================== */  
 
-        displayAIAnswer(
-            answer
-        );
+    displayAIAnswer(  
+        answer  
+    );  
 
 
-        showAIStatus(
-            "✅ Answer ready"
-        );
+    showAIStatus(  
+        "✅ Answer ready"  
+    );  
 
 
-        console.log(
-            "StudyFlow AI: answer displayed successfully."
-        );
+    console.log(  
+        "StudyFlow AI: answer displayed successfully."  
+    );  
 
 
-    } catch (error) {
+} catch (error) {  
 
-        console.error(
-            "StudyFlow AI ERROR:",
-            error
-        );
+    console.error(  
+        "StudyFlow AI ERROR:",  
+        error  
+    );  
 
 
-        if (output) {
+    if (output) {  
 
-            output.style.display =
-                "block";
+        output.style.display =  
+            "block";  
 
-            output.textContent =
-                "⚠️ AI Error: " +
-                (
-                    error?.message ||
-                    "Something went wrong."
-                );
+        output.textContent =  
+            "⚠️ AI Error: " +  
+            (  
+                error?.message ||  
+                "Something went wrong."  
+            );  
 
-        }
+    }  
 
 
-        showAIStatus(
-            "⚠️ AI connection error"
-        );
+    showAIStatus(  
+        "⚠️ AI connection error"  
+    );  
 
 
-    } finally {
+} finally {  
 
-        if (button) {
+    if (button) {  
 
-            button.disabled =
-                false;
+        button.disabled =  
+            false;  
 
-            button.textContent =
-                "✨ Ask StudyFlow AI";
+        button.textContent =  
+            "✨ Ask StudyFlow AI";  
 
-        }
+    }  
 
-    }
+}
 
 };
 
-
 /* ==================================================
-   QUICK AI TOOLS
+QUICK AI TOOLS
 ================================================== */
 
 function selectAITool(tool) {
 
-    const input =
-        document.getElementById(
-            "aiInput"
-        );
+const input =  
+    document.getElementById(  
+        "aiInput"  
+    );  
 
 
-    if (!input) {
-        return;
-    }
+if (!input) {  
+    return;  
+}  
 
 
-    const prompts = {
+const prompts = {  
 
-        "Explain a topic":
-            "Explain this topic in simple words: ",
+    "Explain a topic":  
+        "Explain this topic in simple words: ",  
 
-        "Make notes":
-            "Make clear and easy-to-revise study notes about: ",
+    "Make notes":  
+        "Make clear and easy-to-revise study notes about: ",  
 
-        "Generate quiz":
-            "Create a quiz to test my knowledge about: ",
+    "Generate quiz":  
+        "Create a quiz to test my knowledge about: ",  
 
-        "Create study plan":
-            "Create a study plan for: "
+    "Create study plan":  
+        "Create a study plan for: "  
 
-    };
-
-
-    input.value =
-        prompts[tool] || "";
+};  
 
 
-    input.focus();
+input.value =  
+    prompts[tool] || "";  
+
+
+input.focus();
+
 }
 
-
 /* ==================================================
-   EXPLAIN TOPIC
+EXPLAIN TOPIC
 ================================================== */
 
 async function explainTopic() {
 
-    const input =
-        document.getElementById(
-            "aiTopicInput"
-        );
+const input =  
+    document.getElementById(  
+        "aiTopicInput"  
+    );  
 
 
-    if (!input) {
-        return;
-    }
+if (!input) {  
+    return;  
+}  
 
 
-    const topic =
-        input.value.trim();
+const topic =  
+    input.value.trim();  
 
 
-    if (!topic) {
+if (!topic) {  
 
-        showAIStatus(
-            "Please enter a topic."
-        );
+    showAIStatus(  
+        "Please enter a topic."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
 
-    await window.askStudyAI(
-        `Explain this study topic clearly for a student:
+await window.askStudyAI(  
+    `Explain this study topic clearly for a student:
 
 ${topic}
 
 Use:
+
 1. Simple explanation
+
+
 2. Important points
+
+
 3. One easy example
+
+
 4. Short exam tip`
-    );
+);
 }
 
 
+
 /* ==================================================
-   SUMMARIZE NOTES
+SUMMARIZE NOTES
 ================================================== */
 
 async function summarizeNotes() {
 
-    const input =
-        document.getElementById(
-            "aiNotesInput"
-        );
+const input =  
+    document.getElementById(  
+        "aiNotesInput"  
+    );  
 
 
-    if (!input) {
-        return;
-    }
+if (!input) {  
+    return;  
+}  
 
 
-    const notes =
-        input.value.trim();
+const notes =  
+    input.value.trim();  
 
 
-    if (!notes) {
+if (!notes) {  
 
-        showAIStatus(
-            "Please paste your notes first."
-        );
+    showAIStatus(  
+        "Please paste your notes first."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
 
-    await window.askStudyAI(
-        `Summarize these study notes.
+await window.askStudyAI(  
+    `Summarize these study notes.
 
 Give:
+
 1. Key concepts
+
+
 2. Important facts
+
+
 3. Short revision notes
+
+
 4. Important terms
+
+
 
 Notes:
 
 ${notes}`
-    );
+);
 }
 
-
 /* ==================================================
-   GENERATE QUIZ
+GENERATE QUIZ
 ================================================== */
 
 async function generateQuiz() {
 
-    const input =
-        document.getElementById(
-            "aiQuizTopic"
-        );
+const input =  
+    document.getElementById(  
+        "aiQuizTopic"  
+    );  
 
 
-    if (!input) {
-        return;
-    }
+if (!input) {  
+    return;  
+}  
 
 
-    const topic =
-        input.value.trim();
+const topic =  
+    input.value.trim();  
 
 
-    if (!topic) {
+if (!topic) {  
 
-        showAIStatus(
-            "Please enter a quiz topic."
-        );
+    showAIStatus(  
+        "Please enter a quiz topic."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
 
-    await window.askStudyAI(
-        `Create a student-friendly quiz about:
+await window.askStudyAI(  
+    `Create a student-friendly quiz about:
 
 ${topic}
 
 Create 5 questions.
 
 Mix:
-- Multiple choice
-- Short answer
+
+Multiple choice
+
+Short answer
+
 
 Give the answer after each question.`
-    );
+);
 }
 
-
 /* ==================================================
-   CREATE STUDY PLAN
+CREATE STUDY PLAN
 ================================================== */
 
 async function createStudyPlan() {
 
-    const completed =
-        tasks.filter(function (task) {
+const completed =  
+    tasks.filter(function (task) {  
 
-            return task.completed;
+        return task.completed;  
 
-        }).length;
-
-
-    const pending =
-        tasks.filter(function (task) {
-
-            return !task.completed;
-
-        });
+    }).length;  
 
 
-    const taskText =
-        pending.length
-            ? pending
-                .map(function (task) {
+const pending =  
+    tasks.filter(function (task) {  
 
-                    return (
-                        `${task.subject}: ` +
-                        `${task.task} | ` +
-                        `Deadline: ` +
-                        `${task.date || "None"} | ` +
-                        `Priority: ` +
-                        `${task.priority || "Low"}`
-                    );
+        return !task.completed;  
 
-                })
-                .join("\n")
-            : "No pending tasks.";
+    });  
 
 
-    await window.askStudyAI(
-        `Create a realistic study plan using my current StudyFlow tasks.
+const taskText =  
+    pending.length  
+        ? pending  
+            .map(function (task) {  
+
+                return (  
+                    `${task.subject}: ` +  
+                    `${task.task} | ` +  
+                    `Deadline: ` +  
+                    `${task.date || "None"} | ` +  
+                    `Priority: ` +  
+                    `${task.priority || "Low"}`  
+                );  
+
+            })  
+            .join("\n")  
+        : "No pending tasks.";  
+
+
+await window.askStudyAI(  
+    `Create a realistic study plan using my current StudyFlow tasks.
 
 Completed tasks: ${completed}
 
@@ -2132,210 +2328,222 @@ Pending tasks:
 ${taskText}
 
 Make the plan:
-- Practical
-- Prioritized
-- Easy to follow
-- Deadline-aware
-- Broken into study sessions
+
+Practical
+
+Prioritized
+
+Easy to follow
+
+Deadline-aware
+
+Broken into study sessions
+
 
 Also tell me which task I should focus on first.`
-    );
+);
 }
 
-
 /* ==================================================
-   FOCUS HELP
+FOCUS HELP
 ================================================== */
 
 async function focusHelp() {
 
-    await window.askStudyAI(
-        `Help me focus on my studies using my current tasks.
+await window.askStudyAI(  
+    `Help me focus on my studies using my current tasks.
 
 Look at my pending tasks and tell me:
 
 1. What should I study first?
+
+
 2. What should I ignore for now?
+
+
 3. How should I divide my next study session?
+
+
 4. Give me a short motivation message.
 
+
+
 Keep it practical and concise.`
-    );
+);
 }
 
-
 /* ==================================================
-   AI CHAT
+AI CHAT
 ================================================== */
 
 async function sendAIMessage() {
 
-    const input =
-        document.getElementById(
-            "aiInput"
-        );
+const input =  
+    document.getElementById(  
+        "aiInput"  
+    );  
 
 
-    const button =
-        document.getElementById(
-            "aiSendButton"
-        );
+const button =  
+    document.getElementById(  
+        "aiSendButton"  
+    );  
 
 
-    if (!input) {
-        return;
-    }
+if (!input) {  
+    return;  
+}  
 
 
-    const message =
-        input.value.trim();
+const message =  
+    input.value.trim();  
 
 
-    if (!message) {
-        return;
-    }
+if (!message) {  
+    return;  
+}  
 
 
-    if (button) {
+if (button) {  
 
-        button.disabled =
-            true;
+    button.disabled =  
+        true;  
 
-        button.textContent =
-            "Thinking...";
+    button.textContent =  
+        "Thinking...";  
 
-    }
+}  
 
 
-    try {
+try {  
 
-        await window.askStudyAI(
-            message
-        );
+    await window.askStudyAI(  
+        message  
+    );  
 
-    } finally {
+} finally {  
 
-        if (button) {
+    if (button) {  
 
-            button.disabled =
-                false;
+        button.disabled =  
+            false;  
 
-            button.textContent =
-                "Send ➤";
+        button.textContent =  
+            "Send ➤";  
 
-        }
+    }  
 
-    }
 }
 
+}
 
 /* ==================================================
-   AI ENTER KEY
+AI ENTER KEY
 ================================================== */
 
 function initializeAI() {
 
-    const input =
-        document.getElementById(
-            "aiInput"
-        );
+const input =  
+    document.getElementById(  
+        "aiInput"  
+    );  
 
 
-    if (!input) {
+if (!input) {  
 
-        console.error(
-            "StudyFlow AI: aiInput not found."
-        );
+    console.error(  
+        "StudyFlow AI: aiInput not found."  
+    );  
 
-        return;
-    }
-
-
-    /* Prevent duplicate event listener */
-
-    if (
-        input.dataset.aiInitialized === "true"
-    ) {
-
-        return;
-    }
+    return;  
+}  
 
 
-    input.dataset.aiInitialized =
-        "true";
+/* Prevent duplicate event listener */  
+
+if (  
+    input.dataset.aiInitialized === "true"  
+) {  
+
+    return;  
+}  
 
 
-    input.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (
-                event.key === "Enter" &&
-                !event.shiftKey
-            ) {
-
-                event.preventDefault();
-
-                console.log(
-                    "AI ENTER PRESSED"
-                );
-
-                window.askStudyAI();
-
-            }
-
-        }
-    );
+input.dataset.aiInitialized =  
+    "true";  
 
 
-    updateAIContext();
+input.addEventListener(  
+    "keydown",  
+    function (event) {  
+
+        if (  
+            event.key === "Enter" &&  
+            !event.shiftKey  
+        ) {  
+
+            event.preventDefault();  
+
+            console.log(  
+                "AI ENTER PRESSED"  
+            );  
+
+            window.askStudyAI();  
+
+        }  
+
+    }  
+);  
 
 
-    console.log(
-        "StudyFlow AI initialized successfully."
-    );
+updateAIContext();  
+
+
+console.log(  
+    "StudyFlow AI initialized successfully."  
+);
+
 }
 
-
 /* ==================================================
-   AI INITIALIZATION
+AI INITIALIZATION
 ================================================== */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+"DOMContentLoaded",
+function () {
 
-        initializeAI();
-
-
-        console.log(
-            "StudyFlow AI loaded successfully."
-        );
+initializeAI();  
 
 
-        console.log(
-            "AI input:",
-            document.getElementById("aiInput")
-        );
+    console.log(  
+        "StudyFlow AI loaded successfully."  
+    );  
 
 
-        console.log(
-            "AI response:",
-            document.getElementById("aiResponse")
-        );
+    console.log(  
+        "AI input:",  
+        document.getElementById("aiInput")  
+    );  
 
 
-        console.log(
-            "AI button:",
-            document.getElementById("aiAskButton")
-        );
+    console.log(  
+        "AI response:",  
+        document.getElementById("aiResponse")  
+    );  
 
-    }
+
+    console.log(  
+        "AI button:",  
+        document.getElementById("aiAskButton")  
+    );  
+
+}
+
 );
 
-
 /* ==================================================
-   START APP
+START APP
 ================================================== */
 
 loadTasks();
