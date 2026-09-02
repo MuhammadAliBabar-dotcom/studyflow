@@ -125,25 +125,36 @@ function showLoading() {
 
 function showAnswer(answer) {
 
-    if (!aiResponse) return;
+    if (!aiResponse) {
+        return;
+    }
 
     const safeAnswer =
-        escapeHTML(answer)
-        .replace(/\r?\n/g, "<br>");
+        escapeHTML(answer);
 
     aiResponse.innerHTML = `
+
         <div class="ai-demo-response">
 
             <div class="ai-response-title">
                 🤖 StudyFlow AI
             </div>
 
-            <div class="ai-answer">
-                ${safeAnswer}
-            </div>
+            <div
+                class="ai-answer"
+                style="
+                    white-space: pre-wrap;
+                    line-height: 1.7;
+                    text-align: left;
+                "
+            >${safeAnswer}</div>
 
         </div>
+
     `;
+
+    aiResponse.scrollTop =
+        aiResponse.scrollHeight;
 
 }
 
