@@ -1,5 +1,12 @@
 /* ==================================================
-   STUDYFLOW - TASK SYSTEM + AI READY
+   STUDYFLOW - TASK SYSTEM + AI
+================================================== */
+
+"use strict";
+
+
+/* ==================================================
+   TASK SYSTEM
 ================================================== */
 
 let tasks = [];
@@ -21,14 +28,9 @@ async function loadTasks() {
     } = await supabaseClient.auth.getUser();
 
 
-    if (
-        userError ||
-        !user
-    ) {
+    if (userError || !user) {
 
-        window.location.replace(
-            "login.html"
-        );
+        window.location.replace("login.html");
 
         return;
     }
@@ -40,16 +42,10 @@ async function loadTasks() {
     } = await supabaseClient
         .from("tasks")
         .select("*")
-        .eq(
-            "user_id",
-            user.id
-        )
-        .order(
-            "created_at",
-            {
-                ascending: true
-            }
-        );
+        .eq("user_id", user.id)
+        .order("created_at", {
+            ascending: true
+        });
 
 
     if (error) {
@@ -59,9 +55,7 @@ async function loadTasks() {
             error
         );
 
-        alert(
-            "Could not load your tasks."
-        );
+        alert("Could not load your tasks.");
 
         return;
     }
@@ -71,13 +65,9 @@ async function loadTasks() {
 
 
     displayTasks();
-
     displayCalendar();
-
     displayUpcoming();
-
     updateStats();
-
     updateAIContext();
 }
 
@@ -89,33 +79,19 @@ async function loadTasks() {
 async function addTask() {
 
     const subject =
-        document.getElementById(
-            "subjectInput"
-        ).value.trim();
-
+        document.getElementById("subjectInput")?.value.trim();
 
     const task =
-        document.getElementById(
-            "taskInput"
-        ).value.trim();
-
+        document.getElementById("taskInput")?.value.trim();
 
     const date =
-        document.getElementById(
-            "dateInput"
-        ).value;
-
+        document.getElementById("dateInput")?.value;
 
     const priority =
-        document.getElementById(
-            "priorityInput"
-        ).value;
+        document.getElementById("priorityInput")?.value;
 
 
-    if (
-        subject === "" ||
-        task === ""
-    ) {
+    if (!subject || !task) {
 
         alert(
             "Please enter subject and task!"
@@ -130,16 +106,12 @@ async function addTask() {
             user
         }
     } =
-        await supabaseClient
-            .auth
-            .getUser();
+        await supabaseClient.auth.getUser();
 
 
     if (!user) {
 
-        alert(
-            "Please login first."
-        );
+        alert("Please login first.");
 
         window.location.replace(
             "login.html"
@@ -157,14 +129,11 @@ async function addTask() {
             .from("tasks")
             .insert({
 
-                user_id:
-                    user.id,
+                user_id: user.id,
 
-                subject:
-                    subject,
+                subject: subject,
 
-                task:
-                    task,
+                task: task,
 
                 date:
                     date === ""
@@ -172,10 +141,9 @@ async function addTask() {
                         : date,
 
                 priority:
-                    priority,
+                    priority || "Low",
 
-                completed:
-                    false
+                completed: false
 
             })
             .select()
@@ -203,11 +171,9 @@ async function addTask() {
     clearInputs();
 
     displayTasks();
-
     displayCalendar();
-
     displayUpcoming();
-
+    updateStats();
     updateAIContext();
 }
 
@@ -219,9 +185,7 @@ async function addTask() {
 function displayTasks() {
 
     const taskList =
-        document.getElementById(
-            "taskList"
-        );
+        document.getElementById("taskList");
 
 
     if (!taskList) {
@@ -230,9 +194,7 @@ function displayTasks() {
 
 
     const searchInput =
-        document.getElementById(
-            "searchInput"
-        );
+        document.getElementById("searchInput");
 
 
     const searchText =
@@ -247,69 +209,50 @@ function displayTasks() {
 
 
     const filteredTasks =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                const subject =
-                    String(
-                        task.subject || ""
-                    )
+            const subject =
+                String(task.subject || "")
+                    .toLowerCase();
+
+            const taskName =
+                String(task.task || "")
                     .toLowerCase();
 
 
-                const taskName =
-                    String(
-                        task.task || ""
-                    )
-                    .toLowerCase();
+            return (
+                subject.includes(searchText) ||
+                taskName.includes(searchText)
+            );
+
+        });
 
 
-                return (
-                    subject.includes(
-                        searchText
-                    ) ||
-                    taskName.includes(
-                        searchText
-                    )
-                );
-
-            }
-        );
-
-
-    if (
-        filteredTasks.length === 0
-    ) {
+    if (filteredTasks.length === 0) {
 
         const empty =
-            document.createElement(
-                "li"
-            );
+            document.createElement("li");
 
 
         empty.className =
             "empty-task";
 
 
-        empty.innerHTML =
-            `
-                <div
-                    style="
-                        text-align:center;
-                        width:100%;
-                        padding:20px;
-                        color:#64748b;
-                    "
-                >
-                    📚 No tasks found.
-                </div>
-            `;
+        empty.innerHTML = `
+            <div
+                style="
+                    text-align:center;
+                    width:100%;
+                    padding:20px;
+                    color:#64748b;
+                "
+            >
+                📚 No tasks found.
+            </div>
+        `;
 
 
-        taskList.appendChild(
-            empty
-        );
-
+        taskList.appendChild(empty);
 
         updateStats();
 
@@ -317,254 +260,196 @@ function displayTasks() {
     }
 
 
-    filteredTasks.forEach(
-        function(task) {
+    filteredTasks.forEach(function (task) {
 
-            const li =
-                document.createElement(
-                    "li"
-                );
+        const li =
+            document.createElement("li");
 
 
-            const taskInfo =
-                document.createElement(
-                    "div"
-                );
+        const taskInfo =
+            document.createElement("div");
 
-            taskInfo.className =
-                "task-info";
+        taskInfo.className =
+            "task-info";
 
 
-            if (task.completed) {
+        if (task.completed) {
 
-                taskInfo.classList.add(
-                    "completed"
-                );
-
-            }
-
-
-            const subjectText =
-                document.createElement(
-                    "span"
-                );
-
-            subjectText.className =
-                "subject";
-
-            subjectText.textContent =
-                task.subject;
-
-
-            const taskText =
-                document.createElement(
-                    "span"
-                );
-
-            taskText.className =
-                "task-name";
-
-            taskText.textContent =
-                " — " +
-                task.task;
-
-
-            const priorityText =
-                document.createElement(
-                    "span"
-                );
-
-            priorityText.className =
-                "priority";
-
-
-            const priority =
-                String(
-                    task.priority ||
-                    "Low"
-                );
-
-
-            priorityText.textContent =
-                priority;
-
-
-            if (
-                priority === "High"
-            ) {
-
-                priorityText.classList.add(
-                    "priority-high"
-                );
-
-            } else if (
-                priority === "Medium"
-            ) {
-
-                priorityText.classList.add(
-                    "priority-medium"
-                );
-
-            } else {
-
-                priorityText.classList.add(
-                    "priority-low"
-                );
-
-            }
-
-
-            taskInfo.appendChild(
-                subjectText
-            );
-
-            taskInfo.appendChild(
-                taskText
-            );
-
-            taskInfo.appendChild(
-                priorityText
-            );
-
-
-            if (task.date) {
-
-                const dateText =
-                    document.createElement(
-                        "span"
-                    );
-
-                dateText.className =
-                    "date";
-
-                dateText.textContent =
-                    "📅 Due: " +
-                    formatDate(
-                        task.date
-                    );
-
-                taskInfo.appendChild(
-                    dateText
-                );
-
-            }
-
-
-            const buttons =
-                document.createElement(
-                    "div"
-                );
-
-            buttons.className =
-                "task-buttons";
-
-
-            const completeButton =
-                document.createElement(
-                    "button"
-                );
-
-
-            completeButton.textContent =
-                task.completed
-                    ? "↩ Undo"
-                    : "✓ Complete";
-
-
-            completeButton.type =
-                "button";
-
-
-            completeButton.onclick =
-                function() {
-
-                    toggleTask(
-                        task.id
-                    );
-
-                };
-
-
-            const editButton =
-                document.createElement(
-                    "button"
-                );
-
-
-            editButton.textContent =
-                "✎ Edit";
-
-
-            editButton.type =
-                "button";
-
-
-            editButton.onclick =
-                function() {
-
-                    editTask(
-                        task.id
-                    );
-
-                };
-
-
-            const deleteButton =
-                document.createElement(
-                    "button"
-                );
-
-
-            deleteButton.textContent =
-                "Delete";
-
-
-            deleteButton.type =
-                "button";
-
-
-            deleteButton.className =
-                "delete-btn";
-
-
-            deleteButton.onclick =
-                function() {
-
-                    deleteTask(
-                        task.id
-                    );
-
-                };
-
-
-            buttons.appendChild(
-                completeButton
-            );
-
-            buttons.appendChild(
-                editButton
-            );
-
-            buttons.appendChild(
-                deleteButton
-            );
-
-
-            li.appendChild(
-                taskInfo
-            );
-
-            li.appendChild(
-                buttons
-            );
-
-
-            taskList.appendChild(
-                li
+            taskInfo.classList.add(
+                "completed"
             );
 
         }
-    );
+
+
+        const subjectText =
+            document.createElement("span");
+
+        subjectText.className =
+            "subject";
+
+        subjectText.textContent =
+            task.subject;
+
+
+        const taskText =
+            document.createElement("span");
+
+        taskText.className =
+            "task-name";
+
+        taskText.textContent =
+            " — " + task.task;
+
+
+        const priorityText =
+            document.createElement("span");
+
+        priorityText.className =
+            "priority";
+
+
+        const priority =
+            String(
+                task.priority || "Low"
+            );
+
+
+        priorityText.textContent =
+            priority;
+
+
+        if (priority === "High") {
+
+            priorityText.classList.add(
+                "priority-high"
+            );
+
+        } else if (priority === "Medium") {
+
+            priorityText.classList.add(
+                "priority-medium"
+            );
+
+        } else {
+
+            priorityText.classList.add(
+                "priority-low"
+            );
+
+        }
+
+
+        taskInfo.appendChild(subjectText);
+
+        taskInfo.appendChild(taskText);
+
+        taskInfo.appendChild(priorityText);
+
+
+        if (task.date) {
+
+            const dateText =
+                document.createElement("span");
+
+            dateText.className =
+                "date";
+
+            dateText.textContent =
+                "📅 Due: " +
+                formatDate(task.date);
+
+            taskInfo.appendChild(dateText);
+
+        }
+
+
+        const buttons =
+            document.createElement("div");
+
+        buttons.className =
+            "task-buttons";
+
+
+        const completeButton =
+            document.createElement("button");
+
+        completeButton.type =
+            "button";
+
+        completeButton.textContent =
+            task.completed
+                ? "↩ Undo"
+                : "✓ Complete";
+
+
+        completeButton.onclick =
+            function () {
+
+                toggleTask(task.id);
+
+            };
+
+
+        const editButton =
+            document.createElement("button");
+
+        editButton.type =
+            "button";
+
+        editButton.textContent =
+            "✎ Edit";
+
+
+        editButton.onclick =
+            function () {
+
+                editTask(task.id);
+
+            };
+
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.type =
+            "button";
+
+        deleteButton.className =
+            "delete-btn";
+
+        deleteButton.textContent =
+            "Delete";
+
+
+        deleteButton.onclick =
+            function () {
+
+                deleteTask(task.id);
+
+            };
+
+
+        buttons.appendChild(
+            completeButton
+        );
+
+        buttons.appendChild(
+            editButton
+        );
+
+        buttons.appendChild(
+            deleteButton
+        );
+
+
+        li.appendChild(taskInfo);
+
+        li.appendChild(buttons);
+
+        taskList.appendChild(li);
+
+    });
 
 
     updateStats();
@@ -572,19 +457,17 @@ function displayTasks() {
 
 
 /* ==================================================
-   COMPLETE / UNDO
+   COMPLETE / UNDO TASK
 ================================================== */
 
 async function toggleTask(id) {
 
     const task =
-        tasks.find(
-            function(item) {
+        tasks.find(function (item) {
 
-                return item.id === id;
+            return item.id === id;
 
-            }
-        );
+        });
 
 
     if (!task) {
@@ -602,15 +485,9 @@ async function toggleTask(id) {
         await supabaseClient
             .from("tasks")
             .update({
-
-                completed:
-                    newCompleted
-
+                completed: newCompleted
             })
-            .eq(
-                "id",
-                id
-            );
+            .eq("id", id);
 
 
     if (error) {
@@ -633,11 +510,9 @@ async function toggleTask(id) {
 
 
     displayTasks();
-
     displayCalendar();
-
     displayUpcoming();
-
+    updateStats();
     updateAIContext();
 }
 
@@ -665,10 +540,7 @@ async function deleteTask(id) {
         await supabaseClient
             .from("tasks")
             .delete()
-            .eq(
-                "id",
-                id
-            );
+            .eq("id", id);
 
 
     if (error) {
@@ -687,21 +559,17 @@ async function deleteTask(id) {
 
 
     tasks =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return task.id !== id;
+            return task.id !== id;
 
-            }
-        );
+        });
 
 
     displayTasks();
-
     displayCalendar();
-
     displayUpcoming();
-
+    updateStats();
     updateAIContext();
 }
 
@@ -713,13 +581,11 @@ async function deleteTask(id) {
 async function editTask(id) {
 
     const task =
-        tasks.find(
-            function(item) {
+        tasks.find(function (item) {
 
-                return item.id === id;
+            return item.id === id;
 
-            }
-        );
+        });
 
 
     if (!task) {
@@ -743,9 +609,7 @@ async function editTask(id) {
         newSubject.trim();
 
 
-    if (
-        cleanedSubject === ""
-    ) {
+    if (!cleanedSubject) {
 
         alert(
             "Subject cannot be empty."
@@ -771,9 +635,7 @@ async function editTask(id) {
         newTask.trim();
 
 
-    if (
-        cleanedTask === ""
-    ) {
+    if (!cleanedTask) {
 
         alert(
             "Task cannot be empty."
@@ -816,17 +678,12 @@ async function editTask(id) {
 
 
     if (
-        ![
-            "Low",
-            "Medium",
-            "High"
-        ].includes(
-            cleanedPriority
-        )
+        !["Low", "Medium", "High"]
+            .includes(cleanedPriority)
     ) {
 
-        cleanedPriority =
-            "Low";
+        cleanedPriority = "Low";
+
     }
 
 
@@ -852,10 +709,7 @@ async function editTask(id) {
                     cleanedPriority
 
             })
-            .eq(
-                "id",
-                id
-            );
+            .eq("id", id);
 
 
     if (error) {
@@ -889,11 +743,9 @@ async function editTask(id) {
 
 
     displayTasks();
-
     displayCalendar();
-
     displayUpcoming();
-
+    updateStats();
     updateAIContext();
 }
 
@@ -905,18 +757,14 @@ async function editTask(id) {
 async function clearCompletedTasks() {
 
     const completedTasks =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return task.completed;
+            return task.completed;
 
-            }
-        );
+        });
 
 
-    if (
-        completedTasks.length === 0
-    ) {
+    if (completedTasks.length === 0) {
 
         alert(
             "There are no completed tasks to clear."
@@ -938,13 +786,11 @@ async function clearCompletedTasks() {
 
 
     const ids =
-        completedTasks.map(
-            function(task) {
+        completedTasks.map(function (task) {
 
-                return task.id;
+            return task.id;
 
-            }
-        );
+        });
 
 
     const {
@@ -953,10 +799,7 @@ async function clearCompletedTasks() {
         await supabaseClient
             .from("tasks")
             .delete()
-            .in(
-                "id",
-                ids
-            );
+            .in("id", ids);
 
 
     if (error) {
@@ -975,21 +818,17 @@ async function clearCompletedTasks() {
 
 
     tasks =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return !task.completed;
+            return !task.completed;
 
-            }
-        );
+        });
 
 
     displayTasks();
-
     displayCalendar();
-
     displayUpcoming();
-
+    updateStats();
     updateAIContext();
 }
 
@@ -1005,13 +844,11 @@ function updateStats() {
 
 
     const completed =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return task.completed;
+            return task.completed;
 
-            }
-        ).length;
+        }).length;
 
 
     const pending =
@@ -1022,11 +859,7 @@ function updateStats() {
         total === 0
             ? 0
             : Math.round(
-                (
-                    completed /
-                    total
-                ) *
-                100
+                (completed / total) * 100
             );
 
 
@@ -1087,8 +920,7 @@ function updateStats() {
     if (progressElement) {
 
         progressElement.textContent =
-            percentage +
-            "%";
+            percentage + "%";
 
     }
 
@@ -1102,9 +934,6 @@ function updateStats() {
             total;
 
     }
-
-
-    updateAIContext();
 }
 
 
@@ -1114,25 +943,36 @@ function updateStats() {
 
 function clearInputs() {
 
-    document.getElementById(
-        "subjectInput"
-    ).value = "";
+    const subject =
+        document.getElementById(
+            "subjectInput"
+        );
+
+    const task =
+        document.getElementById(
+            "taskInput"
+        );
+
+    const date =
+        document.getElementById(
+            "dateInput"
+        );
+
+    const priority =
+        document.getElementById(
+            "priorityInput"
+        );
 
 
-    document.getElementById(
-        "taskInput"
-    ).value = "";
+    if (subject) subject.value = "";
 
+    if (task) task.value = "";
 
-    document.getElementById(
-        "dateInput"
-    ).value = "";
+    if (date) date.value = "";
 
-
-    document.getElementById(
-        "priorityInput"
-    ).value =
-        "Low";
+    if (priority) {
+        priority.value = "Low";
+    }
 }
 
 
@@ -1170,161 +1010,115 @@ function displayUpcoming() {
 
     const upcoming =
         tasks
-            .filter(
-                function(task) {
+            .filter(function (task) {
 
-                    if (
-                        !task.date ||
-                        task.completed
-                    ) {
+                if (
+                    !task.date ||
+                    task.completed
+                ) {
 
-                        return false;
-
-                    }
-
-
-                    const taskDate =
-                        new Date(
-                            task.date +
-                            "T00:00:00"
-                        );
-
-
-                    return (
-                        taskDate >= today
-                    );
+                    return false;
 
                 }
-            )
-            .sort(
-                function(a, b) {
 
-                    return (
-                        new Date(
-                            a.date +
-                            "T00:00:00"
-                        ) -
-                        new Date(
-                            b.date +
-                            "T00:00:00"
-                        )
+
+                const taskDate =
+                    new Date(
+                        task.date +
+                        "T00:00:00"
                     );
 
-                }
-            )
-            .slice(
-                0,
-                5
-            );
+
+                return taskDate >= today;
+
+            })
+            .sort(function (a, b) {
+
+                return (
+                    new Date(
+                        a.date +
+                        "T00:00:00"
+                    ) -
+                    new Date(
+                        b.date +
+                        "T00:00:00"
+                    )
+                );
+
+            })
+            .slice(0, 5);
 
 
-    if (
-        upcoming.length === 0
-    ) {
+    if (upcoming.length === 0) {
 
-        upcomingList.innerHTML =
-            `
-                <p class="empty-message">
-                    🎉 No upcoming deadlines.
-                </p>
-            `;
+        upcomingList.innerHTML = `
+            <p class="empty-message">
+                🎉 No upcoming deadlines.
+            </p>
+        `;
 
         return;
     }
 
 
-    upcoming.forEach(
-        function(task) {
+    upcoming.forEach(function (task) {
 
-            const item =
-                document.createElement(
-                    "div"
-                );
+        const item =
+            document.createElement("div");
 
-
-            item.className =
-                "deadline-item";
+        item.className =
+            "deadline-item";
 
 
-            const left =
-                document.createElement(
-                    "div"
-                );
+        const left =
+            document.createElement("div");
 
 
-            const subject =
-                document.createElement(
-                    "div"
-                );
+        const subject =
+            document.createElement("div");
+
+        subject.className =
+            "deadline-subject";
+
+        subject.textContent =
+            task.subject +
+            " — " +
+            task.task;
 
 
-            subject.className =
-                "deadline-subject";
+        const priority =
+            document.createElement("div");
+
+        priority.className =
+            "deadline-date";
+
+        priority.textContent =
+            "Priority: " +
+            task.priority;
 
 
-            subject.textContent =
-                task.subject +
-                " — " +
-                task.task;
+        left.appendChild(subject);
+
+        left.appendChild(priority);
 
 
-            const priority =
-                document.createElement(
-                    "div"
-                );
+        const date =
+            document.createElement("div");
+
+        date.className =
+            "deadline-date";
+
+        date.textContent =
+            formatDate(task.date);
 
 
-            priority.className =
-                "deadline-date";
+        item.appendChild(left);
 
+        item.appendChild(date);
 
-            priority.textContent =
-                "Priority: " +
-                task.priority;
+        upcomingList.appendChild(item);
 
-
-            left.appendChild(
-                subject
-            );
-
-
-            left.appendChild(
-                priority
-            );
-
-
-            const date =
-                document.createElement(
-                    "div"
-                );
-
-
-            date.className =
-                "deadline-date";
-
-
-            date.textContent =
-                formatDate(
-                    task.date
-                );
-
-
-            item.appendChild(
-                left
-            );
-
-
-            item.appendChild(
-                date
-            );
-
-
-            upcomingList.appendChild(
-                item
-            );
-
-        }
-    );
+    });
 }
 
 
@@ -1346,10 +1140,7 @@ function displayCalendar() {
         );
 
 
-    if (
-        !calendar ||
-        !monthTitle
-    ) {
+    if (!calendar || !monthTitle) {
         return;
     }
 
@@ -1403,18 +1194,12 @@ function displayCalendar() {
     ) {
 
         const empty =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         empty.className =
             "calendar-day empty";
 
-
-        calendar.appendChild(
-            empty
-        );
+        calendar.appendChild(empty);
 
     }
 
@@ -1426,50 +1211,31 @@ function displayCalendar() {
     ) {
 
         const cell =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         cell.className =
             "calendar-day";
 
 
         const dayNumber =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         dayNumber.className =
             "day-number";
-
 
         dayNumber.textContent =
             day;
 
 
-        cell.appendChild(
-            dayNumber
-        );
+        cell.appendChild(dayNumber);
 
 
         const dateString =
             year +
             "-" +
-            String(
-                month + 1
-            ).padStart(
-                2,
-                "0"
-            ) +
+            String(month + 1).padStart(2, "0") +
             "-" +
-            String(
-                day
-            ).padStart(
-                2,
-                "0"
-            );
+            String(day).padStart(2, "0");
 
 
         const today =
@@ -1477,77 +1243,55 @@ function displayCalendar() {
 
 
         if (
-            day ===
-                today.getDate() &&
-            month ===
-                today.getMonth() &&
-            year ===
-                today.getFullYear()
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear()
         ) {
 
-            cell.classList.add(
-                "today"
-            );
+            cell.classList.add("today");
 
         }
 
 
         const dayTasks =
-            tasks.filter(
-                function(task) {
+            tasks.filter(function (task) {
 
-                    return (
-                        task.date ===
-                        dateString
-                    );
+                return task.date === dateString;
 
-                }
-            );
+            });
 
 
-        dayTasks.forEach(
-            function(task) {
+        dayTasks.forEach(function (task) {
 
-                const taskElement =
-                    document.createElement(
-                        "span"
-                    );
+            const taskElement =
+                document.createElement("span");
 
+            taskElement.className =
+                "calendar-task";
 
-                taskElement.className =
-                    "calendar-task";
-
-
-                taskElement.textContent =
-                    task.subject +
-                    ": " +
-                    task.task;
+            taskElement.textContent =
+                task.subject +
+                ": " +
+                task.task;
 
 
-                if (
-                    task.completed
-                ) {
+            if (task.completed) {
 
-                    taskElement.style.textDecoration =
-                        "line-through";
+                taskElement.style.textDecoration =
+                    "line-through";
 
-                    taskElement.style.opacity =
-                        "0.5";
-
-                }
-
-
-                cell.appendChild(
-                    taskElement
-                );
+                taskElement.style.opacity =
+                    "0.5";
 
             }
-        );
 
 
-        calendar.appendChild(
-            cell
-        );
+            cell.appendChild(taskElement);
+
+        });
+
+
+        calendar.appendChild(cell);
 
     }
 }
@@ -1563,7 +1307,6 @@ function previousMonth() {
         currentDate.getMonth() - 1
     );
 
-
     displayCalendar();
 }
 
@@ -1573,7 +1316,6 @@ function nextMonth() {
     currentDate.setMonth(
         currentDate.getMonth() + 1
     );
-
 
     displayCalendar();
 }
@@ -1604,6 +1346,7 @@ function formatDate(dateString) {
     ) {
 
         return dateString;
+
     }
 
 
@@ -1663,19 +1406,13 @@ function toggleTheme() {
 
     localStorage.setItem(
         "darkMode",
-        isDark
-            ? "true"
-            : "false"
+        isDark ? "true" : "false"
     );
 
 
     updateThemeButton();
 }
 
-
-/* ==================================================
-   INITIAL THEME
-================================================== */
 
 if (
     localStorage.getItem(
@@ -1693,12 +1430,12 @@ updateThemeButton();
 
 
 /* ==================================================
-   ENTER KEY - ADD TASK
+   TASK ENTER KEY
 ================================================== */
 
 document.addEventListener(
     "DOMContentLoaded",
-    function() {
+    function () {
 
         const subjectInput =
             document.getElementById(
@@ -1717,6 +1454,8 @@ document.addEventListener(
             if (
                 event.key === "Enter"
             ) {
+
+                event.preventDefault();
 
                 addTask();
 
@@ -1744,28 +1483,13 @@ document.addEventListener(
 
         }
 
-
-        initializeAI();
     }
 );
 
 
 /* ==================================================
-   AI STUDY ASSISTANT
-   FRONTEND CONNECTION
+   AI SYSTEM
 ================================================== */
-
-/*
-   IMPORTANT:
-
-   AI API key yahan nahi rakhni.
-
-   Browser -> Supabase Edge Function -> AI Provider
-
-   Is tarah API key GitHub/public website mein
-   expose nahi hogi.
-*/
-
 
 const AI_FUNCTION_NAME =
     "study-ai";
@@ -1793,13 +1517,11 @@ function updateAIContext() {
 
 
     const completed =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return task.completed;
+            return task.completed;
 
-            }
-        ).length;
+        }).length;
 
 
     const pending =
@@ -1808,189 +1530,53 @@ function updateAIContext() {
 
     const upcoming =
         tasks
-            .filter(
-                function(task) {
+            .filter(function (task) {
 
-                    return (
-                        task.date &&
-                        !task.completed
-                    );
+                return (
+                    task.date &&
+                    !task.completed
+                );
 
-                }
-            )
-            .sort(
-                function(a, b) {
+            })
+            .sort(function (a, b) {
 
-                    return (
-                        new Date(a.date) -
-                        new Date(b.date)
-                    );
+                return (
+                    new Date(a.date) -
+                    new Date(b.date)
+                );
 
-                }
-            )
+            })
             .slice(0, 5);
 
 
     aiContext.textContent =
         `
-        Total tasks: ${total}
-        Completed: ${completed}
-        Pending: ${pending}
+Total tasks: ${total}
+Completed: ${completed}
+Pending: ${pending}
 
-        Upcoming:
-        ${
-            upcoming.length
-                ? upcoming
-                    .map(
-                        function(task) {
+Upcoming:
+${
+    upcoming.length
+        ? upcoming
+            .map(function (task) {
 
-                            return (
-                                `${task.subject} - ` +
-                                `${task.task} - ` +
-                                `${task.date || "No date"}`
-                            );
+                return (
+                    `${task.subject} - ` +
+                    `${task.task} - ` +
+                    `${task.date || "No date"}`
+                );
 
-                        }
-                    )
-                    .join("\n")
-                : "No upcoming tasks."
-        }
+            })
+            .join("\n")
+        : "No upcoming tasks."
+}
         `.trim();
 }
 
 
 /* ==================================================
-   AI REQUEST
-================================================== */
-
-async function askStudyAI(
-    prompt,
-    mode = "assistant"
-) {
-
-    const input =
-        String(
-            prompt || ""
-        ).trim();
-
-
-    if (!input) {
-
-        showAIStatus(
-            "Please enter something first."
-        );
-
-        return;
-    }
-
-
-    showAIStatus(
-        "🤖 Study AI is thinking..."
-    );
-
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.functions.invoke(
-                AI_FUNCTION_NAME,
-                {
-                    body: {
-
-                        prompt:
-                            input,
-
-                        mode:
-                            mode,
-
-                        tasks:
-                            tasks.map(
-                                function(task) {
-
-                                    return {
-
-                                        subject:
-                                            task.subject,
-
-                                        task:
-                                            task.task,
-
-                                        date:
-                                            task.date,
-
-                                        priority:
-                                            task.priority,
-
-                                        completed:
-                                            task.completed
-
-                                    };
-
-                                }
-                            )
-
-                    }
-                }
-            );
-
-
-        if (error) {
-
-            console.error(
-                "AI Function Error:",
-                error
-            );
-
-            showAIStatus(
-                "⚠ AI is not connected yet. We will connect the AI backend in the next step."
-            );
-
-            return null;
-        }
-
-
-        const answer =
-            data?.answer ||
-            data?.message ||
-            data?.text ||
-            "AI did not return an answer.";
-
-
-        displayAIAnswer(
-            answer
-        );
-
-
-        showAIStatus(
-            "✅ Answer ready"
-        );
-
-
-        return answer;
-
-    } catch (error) {
-
-        console.error(
-            "AI error:",
-            error
-        );
-
-
-        showAIStatus(
-            "⚠ Something went wrong while connecting to Study AI."
-        );
-
-
-        return null;
-    }
-}
-
-
-/* ==================================================
-   AI UI HELPERS
+   AI RESPONSE DISPLAY
 ================================================== */
 
 function displayAIAnswer(answer) {
@@ -2002,6 +1588,11 @@ function displayAIAnswer(answer) {
 
 
     if (!output) {
+
+        console.error(
+            "StudyFlow AI: aiResponse not found."
+        );
+
         return;
     }
 
@@ -2012,8 +1603,18 @@ function displayAIAnswer(answer) {
 
     output.style.display =
         "block";
+
+
+    output.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+    });
 }
 
+
+/* ==================================================
+   AI STATUS
+================================================== */
 
 function showAIStatus(message) {
 
@@ -2023,18 +1624,326 @@ function showAIStatus(message) {
         );
 
 
-    if (!status) {
-        return;
+    if (status) {
+
+        status.textContent =
+            message;
+
     }
-
-
-    status.textContent =
-        message;
 }
 
 
 /* ==================================================
-   AI QUICK ACTIONS
+   MAIN AI REQUEST
+================================================== */
+
+window.askStudyAI = async function () {
+
+    const input =
+        document.getElementById(
+            "aiInput"
+        );
+
+
+    const output =
+        document.getElementById(
+            "aiResponse"
+        );
+
+
+    const button =
+        document.getElementById(
+            "aiAskButton"
+        );
+
+
+    if (!input) {
+
+        console.error(
+            "StudyFlow AI: aiInput not found."
+        );
+
+        return;
+    }
+
+
+    const question =
+        input.value.trim();
+
+
+    if (!question) {
+
+        showAIStatus(
+            "Please enter a question first."
+        );
+
+        input.focus();
+
+        return;
+    }
+
+
+    if (question.length > 3000) {
+
+        alert(
+            "Please keep your question under 3000 characters."
+        );
+
+        return;
+    }
+
+
+    /* ==========================================
+       BUTTON LOADING
+    ========================================== */
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "⏳ Thinking...";
+
+    }
+
+
+    if (output) {
+
+        output.style.display =
+            "block";
+
+        output.textContent =
+            "🤖 StudyFlow AI is thinking...";
+
+    }
+
+
+    showAIStatus(
+        "🤖 StudyFlow AI is thinking..."
+    );
+
+
+    try {
+
+        /* ==========================================
+           CHECK SUPABASE
+        ========================================== */
+
+        if (
+            typeof supabaseClient === "undefined" ||
+            !supabaseClient
+        ) {
+
+            throw new Error(
+                "Supabase client is not available."
+            );
+
+        }
+
+
+        console.log(
+            "StudyFlow AI: sending question:",
+            question
+        );
+
+
+        /* ==========================================
+           CALL EDGE FUNCTION
+        ========================================== */
+
+        const result =
+            await supabaseClient.functions.invoke(
+                AI_FUNCTION_NAME,
+                {
+                    body: {
+
+                        question:
+                            question
+
+                    }
+                }
+            );
+
+
+        console.log(
+            "StudyFlow AI result:",
+            result
+        );
+
+
+        const data =
+            result?.data;
+
+
+        const error =
+            result?.error;
+
+
+        /* ==========================================
+           SUPABASE ERROR
+        ========================================== */
+
+        if (error) {
+
+            console.error(
+                "Supabase Function Error:",
+                error
+            );
+
+            throw new Error(
+                error.message ||
+                "Study AI request failed."
+            );
+
+        }
+
+
+        if (!data) {
+
+            throw new Error(
+                "No data returned from Study AI."
+            );
+
+        }
+
+
+        console.log(
+            "StudyFlow AI data:",
+            data
+        );
+
+
+        /* ==========================================
+           GET ANSWER
+        ========================================== */
+
+        const answer =
+            data.answer ||
+            data.message ||
+            data.text;
+
+
+        if (
+            typeof answer !== "string" ||
+            !answer.trim()
+        ) {
+
+            throw new Error(
+                "AI returned no answer."
+            );
+
+        }
+
+
+        /* ==========================================
+           SHOW ANSWER
+        ========================================== */
+
+        displayAIAnswer(
+            answer
+        );
+
+
+        showAIStatus(
+            "✅ Answer ready"
+        );
+
+
+        console.log(
+            "StudyFlow AI: answer displayed successfully."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "StudyFlow AI ERROR:",
+            error
+        );
+
+
+        if (output) {
+
+            output.style.display =
+                "block";
+
+            output.textContent =
+                "⚠️ AI Error: " +
+                (
+                    error?.message ||
+                    "Something went wrong."
+                );
+
+        }
+
+
+        showAIStatus(
+            "⚠️ AI connection error"
+        );
+
+
+    } finally {
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "✨ Ask StudyFlow AI";
+
+        }
+
+    }
+
+};
+
+
+/* ==================================================
+   QUICK AI TOOLS
+================================================== */
+
+function selectAITool(tool) {
+
+    const input =
+        document.getElementById(
+            "aiInput"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const prompts = {
+
+        "Explain a topic":
+            "Explain this topic in simple words: ",
+
+        "Make notes":
+            "Make clear and easy-to-revise study notes about: ",
+
+        "Generate quiz":
+            "Create a quiz to test my knowledge about: ",
+
+        "Create study plan":
+            "Create a study plan for: "
+
+    };
+
+
+    input.value =
+        prompts[tool] || "";
+
+
+    input.focus();
+}
+
+
+/* ==================================================
+   EXPLAIN TOPIC
 ================================================== */
 
 async function explainTopic() {
@@ -2064,9 +1973,8 @@ async function explainTopic() {
     }
 
 
-    await askStudyAI(
-        `
-Explain this study topic clearly for a student:
+    await window.askStudyAI(
+        `Explain this study topic clearly for a student:
 
 ${topic}
 
@@ -2074,12 +1982,14 @@ Use:
 1. Simple explanation
 2. Important points
 3. One easy example
-4. Short exam tip
-        `,
-        "explain"
+4. Short exam tip`
     );
 }
 
+
+/* ==================================================
+   SUMMARIZE NOTES
+================================================== */
 
 async function summarizeNotes() {
 
@@ -2108,9 +2018,8 @@ async function summarizeNotes() {
     }
 
 
-    await askStudyAI(
-        `
-Summarize these study notes.
+    await window.askStudyAI(
+        `Summarize these study notes.
 
 Give:
 1. Key concepts
@@ -2120,12 +2029,14 @@ Give:
 
 Notes:
 
-${notes}
-        `,
-        "summary"
+${notes}`
     );
 }
 
+
+/* ==================================================
+   GENERATE QUIZ
+================================================== */
 
 async function generateQuiz() {
 
@@ -2154,9 +2065,8 @@ async function generateQuiz() {
     }
 
 
-    await askStudyAI(
-        `
-Create a student-friendly quiz about:
+    await window.askStudyAI(
+        `Create a student-friendly quiz about:
 
 ${topic}
 
@@ -2166,59 +2076,54 @@ Mix:
 - Multiple choice
 - Short answer
 
-Give the answer after each question.
-        `,
-        "quiz"
+Give the answer after each question.`
     );
 }
 
 
+/* ==================================================
+   CREATE STUDY PLAN
+================================================== */
+
 async function createStudyPlan() {
 
     const completed =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return task.completed;
+            return task.completed;
 
-            }
-        ).length;
+        }).length;
 
 
     const pending =
-        tasks.filter(
-            function(task) {
+        tasks.filter(function (task) {
 
-                return !task.completed;
+            return !task.completed;
 
-            }
-        );
+        });
 
 
     const taskText =
         pending.length
             ? pending
-                .map(
-                    function(task) {
+                .map(function (task) {
 
-                        return (
-                            `${task.subject}: ` +
-                            `${task.task} | ` +
-                            `Deadline: ` +
-                            `${task.date || "None"} | ` +
-                            `Priority: ` +
-                            `${task.priority || "Low"}`
-                        );
+                    return (
+                        `${task.subject}: ` +
+                        `${task.task} | ` +
+                        `Deadline: ` +
+                        `${task.date || "None"} | ` +
+                        `Priority: ` +
+                        `${task.priority || "Low"}`
+                    );
 
-                    }
-                )
+                })
                 .join("\n")
             : "No pending tasks.";
 
 
-    await askStudyAI(
-        `
-Create a realistic study plan using my current StudyFlow tasks.
+    await window.askStudyAI(
+        `Create a realistic study plan using my current StudyFlow tasks.
 
 Completed tasks: ${completed}
 
@@ -2233,18 +2138,19 @@ Make the plan:
 - Deadline-aware
 - Broken into study sessions
 
-Also tell me which task I should focus on first.
-        `,
-        "plan"
+Also tell me which task I should focus on first.`
     );
 }
 
 
+/* ==================================================
+   FOCUS HELP
+================================================== */
+
 async function focusHelp() {
 
-    await askStudyAI(
-        `
-Help me focus on my studies using my current tasks.
+    await window.askStudyAI(
+        `Help me focus on my studies using my current tasks.
 
 Look at my pending tasks and tell me:
 
@@ -2253,9 +2159,7 @@ Look at my pending tasks and tell me:
 3. How should I divide my next study session?
 4. Give me a short motivation message.
 
-Keep it practical and concise.
-        `,
-        "focus"
+Keep it practical and concise.`
     );
 }
 
@@ -2268,181 +2172,9 @@ async function sendAIMessage() {
 
     const input =
         document.getElementById(
-            "aiChatInput"
-        );
-
-
-    if (!input) {
-        return;
-    }
-
-
-    const message =
-        input.value.trim();
-
-
-    if (!message) {
-        return;
-    }
-
-
-    input.value = "";
-
-
-    await askStudyAI(
-        message,
-        "chat"
-    );
-}
-
-
-/* ==================================================
-   AI ENTER KEY
-================================================== */
-
-function initializeAI() {
-
-    const chatInput =
-        document.getElementById(
-            "aiChatInput"
-        );
-
-
-    if (chatInput) {
-
-        chatInput.addEventListener(
-            "keydown",
-            function(event) {
-
-                if (
-                    event.key === "Enter" &&
-                    !event.shiftKey
-                ) {
-
-                    event.preventDefault();
-
-                    sendAIMessage();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    updateAIContext();
-}
-
-
-/* ==================================================
-   START APP
-================================================== */
-
-loadTasks();
-/* ==================================================
-   STUDYFLOW AI - FRONTEND
-================================================== */
-
-function selectAITool(tool) {
-
-    const input =
-        document.getElementById("aiInput");
-
-    if (!input) {
-        return;
-    }
-
-    const prompts = {
-
-        "Explain a topic":
-            "Explain this topic in simple words: ",
-
-        "Make notes":
-            "Make clear and easy-to-revise study notes about: ",
-
-        "Generate quiz":
-            "Create a quiz to test my knowledge about: ",
-
-        "Create study plan":
-            "Create a study plan for: "
-
-    };
-
-    input.value =
-        prompts[tool] || "";
-
-    input.focus();
-}
-
-
-function addAIMessage(
-    message,
-    isUser = false
-) {
-
-    const messages =
-        document.getElementById(
-            "aiMessages"
-        );
-
-    if (!messages) {
-        return;
-    }
-
-
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.className =
-        isUser
-            ? "ai-message ai-message-user"
-            : "ai-message";
-
-
-    const content =
-        document.createElement("div");
-
-    content.className =
-        "ai-message-content";
-
-
-    const strong =
-        document.createElement("strong");
-
-    strong.textContent =
-        isUser
-            ? "You"
-            : "StudyFlow AI";
-
-
-    const paragraph =
-        document.createElement("p");
-
-    paragraph.textContent =
-        message;
-
-
-    content.appendChild(strong);
-
-    content.appendChild(paragraph);
-
-    wrapper.appendChild(content);
-
-    messages.appendChild(wrapper);
-
-
-    messages.scrollTop =
-        messages.scrollHeight;
-}
-
-
-async function sendAIMessage() {
-
-    const input =
-        document.getElementById(
             "aiInput"
         );
+
 
     const button =
         document.getElementById(
@@ -2464,18 +2196,10 @@ async function sendAIMessage() {
     }
 
 
-    addAIMessage(
-        message,
-        true
-    );
-
-
-    input.value = "";
-
-
     if (button) {
 
-        button.disabled = true;
+        button.disabled =
+            true;
 
         button.textContent =
             "Thinking...";
@@ -2483,33 +2207,25 @@ async function sendAIMessage() {
     }
 
 
-    /*
-       AI API connection will be added
-       through a secure backend next.
+    try {
 
-       DO NOT put an OpenAI/Gemini API key
-       directly inside this file.
-    */
+        await window.askStudyAI(
+            message
+        );
 
-    setTimeout(
-        function() {
+    } finally {
 
-            addAIMessage(
-                "AI connection is ready for the next setup step. Your API key will be connected securely through the backend."
-            );
+        if (button) {
 
-            if (button) {
+            button.disabled =
+                false;
 
-                button.disabled = false;
+            button.textContent =
+                "Send ➤";
 
-                button.textContent =
-                    "Send ➤";
+        }
 
-            }
-
-        },
-        700
-    );
+    }
 }
 
 
@@ -2517,38 +2233,109 @@ async function sendAIMessage() {
    AI ENTER KEY
 ================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
+function initializeAI() {
 
-        const input =
-            document.getElementById(
-                "aiInput"
-            );
+    const input =
+        document.getElementById(
+            "aiInput"
+        );
 
 
-        if (!input) {
-            return;
-        }
+    if (!input) {
+
+        console.error(
+            "StudyFlow AI: aiInput not found."
+        );
+
+        return;
+    }
 
 
-        input.addEventListener(
-            "keydown",
-            function(event) {
+    /* Prevent duplicate event listener */
 
-                if (
-                    event.key === "Enter" &&
-                    !event.shiftKey
-                ) {
+    if (
+        input.dataset.aiInitialized === "true"
+    ) {
 
-                    event.preventDefault();
+        return;
+    }
 
-                    sendAIMessage();
 
-                }
+    input.dataset.aiInitialized =
+        "true";
+
+
+    input.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                console.log(
+                    "AI ENTER PRESSED"
+                );
+
+                window.askStudyAI();
 
             }
+
+        }
+    );
+
+
+    updateAIContext();
+
+
+    console.log(
+        "StudyFlow AI initialized successfully."
+    );
+}
+
+
+/* ==================================================
+   AI INITIALIZATION
+================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        initializeAI();
+
+
+        console.log(
+            "StudyFlow AI loaded successfully."
+        );
+
+
+        console.log(
+            "AI input:",
+            document.getElementById("aiInput")
+        );
+
+
+        console.log(
+            "AI response:",
+            document.getElementById("aiResponse")
+        );
+
+
+        console.log(
+            "AI button:",
+            document.getElementById("aiAskButton")
         );
 
     }
 );
+
+
+/* ==================================================
+   START APP
+================================================== */
+
+loadTasks();
