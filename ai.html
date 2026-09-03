@@ -5,35 +5,24 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>StudyFlow AI</title>
 
-    <!-- v3 = fresh CSS, avoids browser cache -->
-    <link
-        rel="stylesheet"
-        href="ai.css?v3"
-    >
+    <link rel="stylesheet" href="ai.css?v=10">
 
 </head>
 
 
 <body>
 
-
-    <!-- =====================================================
-         NAVBAR
-    ====================================================== -->
+    <!-- NAVBAR -->
 
     <nav class="ai-navbar">
 
         <div class="ai-logo">
             📚 StudyFlow AI
         </div>
-
 
         <a
             href="dashboard.html"
@@ -45,37 +34,31 @@
     </nav>
 
 
-
-    <!-- =====================================================
-         MAIN AI AREA
-    ====================================================== -->
+    <!-- MAIN -->
 
     <main class="ai-container">
 
 
-        <!-- =================================================
-             HERO
-        ================================================== -->
+        <!-- HERO -->
 
         <section class="ai-hero">
 
-            <div>
+            <div class="ai-hero-content">
 
                 <p class="ai-welcome">
                     🤖 Your Personal Study Assistant
                 </p>
 
-
                 <h1>
-                    Study Smarter<br>
+                    Study Smarter
+                    <br>
                     with AI.
                 </h1>
 
-
                 <p>
-                    Ask questions, create study plans,
-                    generate quizzes, summarize notes
-                    and understand difficult topics.
+                    Your intelligent study companion for
+                    explanations, summaries, quizzes and
+                    personalized study plans.
                 </p>
 
             </div>
@@ -89,160 +72,27 @@
 
 
 
-        <!-- =================================================
-             AI TOOLS
-        ================================================== -->
+        <!-- MAIN ASK AI -->
 
-        <section class="ai-tools">
+        <section class="ask-ai-card">
 
+            <div class="ask-ai-top">
 
-            <!-- ASK AI -->
-
-            <button
-                type="button"
-                class="ai-tool active"
-                onclick="selectAITool('Ask anything')"
-            >
-
-                <span>
-                    💬
-                </span>
-
-                <strong>
-                    Ask StudyFlow AI
-                </strong>
-
-                <small>
-                    Ask anything about your studies
-                </small>
-
-            </button>
-
-
-
-            <!-- STUDY PLAN -->
-
-            <button
-                type="button"
-                class="ai-tool"
-                onclick="selectAITool('Create study plan')"
-            >
-
-                <span>
-                    📅
-                </span>
-
-                <strong>
-                    Study Plan
-                </strong>
-
-                <small>
-                    Create a focused study schedule
-                </small>
-
-            </button>
-
-
-
-            <!-- QUIZ -->
-
-            <button
-                type="button"
-                class="ai-tool"
-                onclick="selectAITool('Generate quiz')"
-            >
-
-                <span>
-                    🧠
-                </span>
-
-                <strong>
-                    Generate Quiz
-                </strong>
-
-                <small>
-                    Practice with questions
-                </small>
-
-            </button>
-
-
-
-            <!-- SUMMARY -->
-
-            <button
-                type="button"
-                class="ai-tool"
-                onclick="selectAITool('Make notes')"
-            >
-
-                <span>
-                    📝
-                </span>
-
-                <strong>
-                    Summarize Notes
-                </strong>
-
-                <small>
-                    Turn notes into key points
-                </small>
-
-            </button>
-
-
-
-            <!-- EXPLAIN -->
-
-            <button
-                type="button"
-                class="ai-tool"
-                onclick="selectAITool('Explain a topic')"
-            >
-
-                <span>
-                    💡
-                </span>
-
-                <strong>
-                    Explain Topic
-                </strong>
-
-                <small>
-                    Understand difficult topics
-                </small>
-
-            </button>
-
-
-        </section>
-
-
-
-        <!-- =================================================
-             AI PANEL
-        ================================================== -->
-
-        <section class="ai-panel">
-
-
-            <!-- PANEL HEADER -->
-
-            <div class="ai-panel-header">
+                <div class="ask-ai-icon">
+                    ✨
+                </div>
 
                 <div>
 
-                    <h2 id="toolTitle">
+                    <h2>
                         Ask StudyFlow AI
                     </h2>
 
-
-                    <p id="toolDescription">
-                        Ask anything related to your studies.
+                    <p>
+                        Ask anything related to your studies
                     </p>
 
                 </div>
-
 
                 <span class="ai-status">
                     ● AI Ready
@@ -251,11 +101,6 @@
             </div>
 
 
-
-            <!-- =================================================
-                 AI RESPONSE
-            ================================================== -->
-
             <div
                 id="aiResponse"
                 class="ai-response"
@@ -263,11 +108,9 @@
 
                 <div class="ai-message">
 
-
                     <span class="message-icon">
                         🤖
                     </span>
-
 
                     <div>
 
@@ -275,28 +118,20 @@
                             StudyFlow AI
                         </strong>
 
-
                         <p>
                             Hi! I'm ready to help you study.
-                            Ask me a question or choose a
-                            study tool above.
+                            Ask me anything or choose a
+                            study tool below.
                         </p>
 
                     </div>
-
 
                 </div>
 
             </div>
 
 
-
-            <!-- =================================================
-                 INPUT
-            ================================================== -->
-
-            <div class="ai-input-area">
-
+            <div class="ask-ai-input">
 
                 <textarea
                     id="aiInput"
@@ -314,36 +149,184 @@
                     ✨ Ask StudyFlow AI
                 </button>
 
+            </div>
+
+        </section>
+
+
+
+        <!-- AI TOOLS TITLE -->
+
+        <div class="tools-heading">
+
+            <div>
+
+                <h2>
+                    AI Study Tools
+                </h2>
+
+                <p>
+                    Choose a tool to study smarter
+                </p>
 
             </div>
+
+        </div>
+
+
+
+        <!-- FOUR TOOLS -->
+
+        <section class="ai-tools">
+
+
+            <!-- SUMMARIZE -->
+
+            <button
+                type="button"
+                class="ai-tool"
+                onclick="selectAITool('Make notes')"
+            >
+
+                <div class="tool-icon summary-icon">
+                    📝
+                </div>
+
+                <div class="tool-content">
+
+                    <strong>
+                        Summarize Notes
+                    </strong>
+
+                    <small>
+                        Turn your notes into
+                        clear revision points.
+                    </small>
+
+                </div>
+
+                <span class="tool-arrow">
+                    →
+                </span>
+
+            </button>
+
+
+
+            <!-- QUIZ -->
+
+            <button
+                type="button"
+                class="ai-tool"
+                onclick="selectAITool('Generate quiz')"
+            >
+
+                <div class="tool-icon quiz-icon">
+                    🧠
+                </div>
+
+                <div class="tool-content">
+
+                    <strong>
+                        Generate Quiz
+                    </strong>
+
+                    <small>
+                        Test your knowledge with
+                        AI-generated questions.
+                    </small>
+
+                </div>
+
+                <span class="tool-arrow">
+                    →
+                </span>
+
+            </button>
+
+
+
+            <!-- STUDY PLAN -->
+
+            <button
+                type="button"
+                class="ai-tool"
+                onclick="selectAITool('Create study plan')"
+            >
+
+                <div class="tool-icon plan-icon">
+                    📅
+                </div>
+
+                <div class="tool-content">
+
+                    <strong>
+                        Study Plan
+                    </strong>
+
+                    <small>
+                        Create a focused and
+                        realistic study schedule.
+                    </small>
+
+                </div>
+
+                <span class="tool-arrow">
+                    →
+                </span>
+
+            </button>
+
+
+
+            <!-- EXPLAIN -->
+
+            <button
+                type="button"
+                class="ai-tool"
+                onclick="selectAITool('Explain a topic')"
+            >
+
+                <div class="tool-icon explain-icon">
+                    💡
+                </div>
+
+                <div class="tool-content">
+
+                    <strong>
+                        Explain Topic
+                    </strong>
+
+                    <small>
+                        Understand difficult topics
+                        in simple words.
+                    </small>
+
+                </div>
+
+                <span class="tool-arrow">
+                    →
+                </span>
+
+            </button>
 
 
         </section>
 
 
 
-        <!-- =================================================
-             FOOTER NOTE
-        ================================================== -->
+        <!-- FOOTER -->
 
         <p class="ai-note">
-
-            StudyFlow AI is designed to help you learn,
+            StudyFlow AI helps you learn,
             understand and organize your studies.
-
         </p>
 
 
     </main>
 
 
-
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
-
     <script src="ai.js"></script>
-
 
 </body>
 
