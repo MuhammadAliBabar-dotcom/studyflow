@@ -1,15 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>StudyFlow AI</title>
 
-    <link rel="stylesheet" href="ai.css">
+    <!-- v3 = fresh CSS, avoids browser cache -->
+    <link
+        rel="stylesheet"
+        href="ai.css?v3"
+    >
+
 </head>
 
+
 <body>
+
+
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
 
     <nav class="ai-navbar">
 
@@ -17,33 +34,52 @@
             📚 StudyFlow AI
         </div>
 
-        <a href="dashboard.html" class="back-button">
+
+        <a
+            href="dashboard.html"
+            class="back-button"
+        >
             ← Back to Dashboard
         </a>
 
     </nav>
 
 
+
+    <!-- =====================================================
+         MAIN AI AREA
+    ====================================================== -->
+
     <main class="ai-container">
+
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
 
         <section class="ai-hero">
 
             <div>
+
                 <p class="ai-welcome">
                     🤖 Your Personal Study Assistant
                 </p>
+
 
                 <h1>
                     Study Smarter<br>
                     with AI.
                 </h1>
 
+
                 <p>
                     Ask questions, create study plans,
                     generate quizzes, summarize notes
                     and understand difficult topics.
                 </p>
+
             </div>
+
 
             <div class="ai-hero-icon">
                 🧠
@@ -52,90 +88,145 @@
         </section>
 
 
-        <!-- AI TOOLS -->
+
+        <!-- =================================================
+             AI TOOLS
+        ================================================== -->
 
         <section class="ai-tools">
 
+
+            <!-- ASK AI -->
+
             <button
+                type="button"
                 class="ai-tool active"
-                onclick="selectTool('question')">
+                onclick="selectAITool('Ask anything')"
+            >
 
-                <span>💬</span>
+                <span>
+                    💬
+                </span>
 
-                <strong>Ask AI</strong>
+                <strong>
+                    Ask StudyFlow AI
+                </strong>
 
                 <small>
-                    Ask anything
+                    Ask anything about your studies
                 </small>
 
             </button>
 
+
+
+            <!-- STUDY PLAN -->
 
             <button
+                type="button"
                 class="ai-tool"
-                onclick="selectTool('plan')">
+                onclick="selectAITool('Create study plan')"
+            >
 
-                <span>📅</span>
+                <span>
+                    📅
+                </span>
 
-                <strong>Study Plan</strong>
+                <strong>
+                    Study Plan
+                </strong>
 
                 <small>
-                    Make a plan
+                    Create a focused study schedule
                 </small>
 
             </button>
 
+
+
+            <!-- QUIZ -->
 
             <button
+                type="button"
                 class="ai-tool"
-                onclick="selectTool('quiz')">
+                onclick="selectAITool('Generate quiz')"
+            >
 
-                <span>🧠</span>
+                <span>
+                    🧠
+                </span>
 
-                <strong>Quiz</strong>
+                <strong>
+                    Generate Quiz
+                </strong>
 
                 <small>
-                    Test yourself
+                    Practice with questions
                 </small>
 
             </button>
 
+
+
+            <!-- SUMMARY -->
 
             <button
+                type="button"
                 class="ai-tool"
-                onclick="selectTool('summary')">
+                onclick="selectAITool('Make notes')"
+            >
 
-                <span>📝</span>
+                <span>
+                    📝
+                </span>
 
-                <strong>Summary</strong>
+                <strong>
+                    Summarize Notes
+                </strong>
 
                 <small>
-                    Short notes
+                    Turn notes into key points
                 </small>
 
             </button>
 
+
+
+            <!-- EXPLAIN -->
 
             <button
+                type="button"
                 class="ai-tool"
-                onclick="selectTool('explain')">
+                onclick="selectAITool('Explain a topic')"
+            >
 
-                <span>💡</span>
+                <span>
+                    💡
+                </span>
 
-                <strong>Explain</strong>
+                <strong>
+                    Explain Topic
+                </strong>
 
                 <small>
-                    Understand topics
+                    Understand difficult topics
                 </small>
 
             </button>
+
 
         </section>
 
 
-        <!-- AI CHAT -->
+
+        <!-- =================================================
+             AI PANEL
+        ================================================== -->
 
         <section class="ai-panel">
+
+
+            <!-- PANEL HEADER -->
 
             <div class="ai-panel-header">
 
@@ -145,11 +236,13 @@
                         Ask StudyFlow AI
                     </h2>
 
+
                     <p id="toolDescription">
                         Ask anything related to your studies.
                     </p>
 
                 </div>
+
 
                 <span class="ai-status">
                     ● AI Ready
@@ -158,21 +251,30 @@
             </div>
 
 
+
+            <!-- =================================================
+                 AI RESPONSE
+            ================================================== -->
+
             <div
                 id="aiResponse"
-                class="ai-response">
+                class="ai-response"
+            >
 
                 <div class="ai-message">
+
 
                     <span class="message-icon">
                         🤖
                     </span>
+
 
                     <div>
 
                         <strong>
                             StudyFlow AI
                         </strong>
+
 
                         <p>
                             Hi! I'm ready to help you study.
@@ -182,41 +284,67 @@
 
                     </div>
 
+
                 </div>
 
             </div>
 
 
+
+            <!-- =================================================
+                 INPUT
+            ================================================== -->
+
             <div class="ai-input-area">
+
 
                 <textarea
                     id="aiInput"
+                    rows="4"
+                    maxlength="3000"
                     placeholder="Ask StudyFlow AI anything..."
-                    rows="4"></textarea>
+                ></textarea>
 
 
                 <button
+                    type="button"
                     id="aiSendButton"
-                    onclick="sendAIRequest()">
-
-                    ✨ Ask AI
-
+                    onclick="sendAIMessage()"
+                >
+                    ✨ Ask StudyFlow AI
                 </button>
 
+
             </div>
+
 
         </section>
 
 
+
+        <!-- =================================================
+             FOOTER NOTE
+        ================================================== -->
+
         <p class="ai-note">
+
             StudyFlow AI is designed to help you learn,
             understand and organize your studies.
+
         </p>
+
 
     </main>
 
 
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
     <script src="ai.js"></script>
 
+
 </body>
+
 </html>
